@@ -1,0 +1,25 @@
+{
+  "name": "tvscreenthingy",
+  "productName": "tvscreenthingy",
+  "version": "0.1.0",
+  "description": "My Electron application description",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "SET APP_DEV=true && electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --win --x64"
+  },
+  "keywords": [],
+  "author": {
+    "name": "phaze-the-dumb",
+    "email": "phaze@duck.com"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0"
+  },
+  "devDependencies": {
+    "electron": "26.2.2",
+    "electron-builder": "^24.6.3"
+  }
+}
