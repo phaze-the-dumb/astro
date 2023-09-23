@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://kit.fontawesome.com/9a203e5ff1.js" crossorigin="anonymous"></script>
+    <title>Astro Panel</title>
+  </head>
+  <body>
+    <div class="title">Astro</div>
+
+    <div class="auth">
+      <div class="button" id="get-code">Get Code</div>
+      <div class="code-input">
+        <input type="text" id="submit-code-input">
+        <div class="button" id="submit-code">Submit</div>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="control-buttons">
+        <div class="button" id="start-button">Start</div>
+        <div class="button" id="stop-button">Stop</div>
+      </div><br />
+
+      <div class="player">
+        <div class="player-prev" id="prev-button">
+          <i class="fa-solid fa-backward-step"></i>
+        </div>
+        <div class="player-info">
+          phazed.xyz
+        </div>
+        <div class="player-next" id="next-button">
+          <i class="fa-solid fa-forward-step"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="loading-indicator"></div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

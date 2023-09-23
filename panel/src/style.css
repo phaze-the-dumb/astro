@@ -1,0 +1,168 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300&display=swap');
+
+body{
+  background: #242424;
+  color: white;
+  font-family: 'Rubik', sans-serif;
+}
+
+.button{
+  padding: 10px 15px;
+  display: inline-block;
+  background: #111;
+  border-radius: 10px;
+  user-select: none;
+  cursor: pointer;
+  border: 2px #111 solid;
+  transition: 0.5s;
+}
+
+.button:hover{
+  border: 2px #555 solid;
+}
+
+.title{
+  position: fixed;
+  top: 10px;
+  font-size: 70px;
+  text-align: center;
+  width: 100%;
+}
+
+.auth{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+input[type="text"]{
+  padding: 10px 15px;
+  display: inline-block;
+  background: #3f3f3f;
+  border-radius: 10px;
+  user-select: none;
+  cursor: pointer;
+  border: 2px #3f3f3f solid;
+  transition: 0.5s;
+  color: white;
+  outline: none;
+  font-size: 15px;
+}
+
+input[type="text"]:focus{
+  border: 2px #555 solid;
+}
+
+.code-input{
+  display: none;
+}
+
+.main{
+  position: fixed;
+  top: 100px;
+  left: 50px;
+  width: calc(100% - 100px);
+  text-align: center;
+  display: none;
+}
+
+.loading-indicator{
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: #fff 5px solid;
+  border-left: #0000 5px solid;
+  border-right: #0000 5px solid;
+  animation: loading 2s infinite linear;
+  display: none;
+}
+
+.player{
+  background: linear-gradient(to right, #006c86 50%, #111 00%);
+  width: 300px;
+  height: 60px;
+  border-radius: 10px;
+  display: inline-flex;
+  font-size: 20px;
+}
+
+.player-prev{
+  width: 40px;
+  height: 60px;
+  border-right: 2px solid #fff5;
+  border-radius: 10px 0 0 10px;
+  transition: 0.1s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.player-prev:hover{
+  background: #fff5;
+}
+
+.player-info{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 15px;
+}
+
+.player-next{
+  width: 40px;
+  height: 60px;
+  border-left: 2px solid #fff5;
+  border-radius: 0 10px 10px 0;
+  transition: 0.1s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.player-next:hover{
+  background: #fff5;
+}
+
+.alert{
+  position: fixed;
+  top: 50px;
+  left: -430px;
+  width: 400px;
+  background: rgba(68, 68, 68, 0.568);
+  backdrop-filter: blur(10px);
+  min-height: 70px;
+  border-bottom: #00ccff 10px solid;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 10px;
+  color: white;
+  transition: 0.5s;
+  box-shadow: #0005 0 0 10px;
+  opacity: 0;
+}
+
+.alert-title{
+  font-size: 25px;
+}
+
+.alert-body{
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  height: 40px;
+  color: #ccc;
+}
+
+@keyframes loading{
+  0%{
+    rotate: 0deg;
+  }
+  100%{
+    rotate: 360deg;
+  }
+}
