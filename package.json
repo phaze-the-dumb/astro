@@ -2,7 +2,7 @@
   "name": "astro",
   "productName": "Astro",
   "version": "0.1.0",
-  "description": "An application for showing statistics on a screen",
+  "description": "An application for showing statistics on a screen.",
   "main": "src/index.js",
   "scripts": {
     "start": "SET APP_DEV=true && electron .",
