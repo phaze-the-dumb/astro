@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { Config } = require('./classes/config');
@@ -34,6 +34,9 @@ app.on('ready', () => {
       mainWindow.loadFile(path.join(__dirname, '../ui/index.html'));
   }
 
+  let icon = nativeImage.createFromPath(path.join(__dirname, '../build/icon.ico'));
+  mainWindow.setIcon(icon);
+
   server.getEmitter().on('link-code', ( code ) => {
     mainWindow.webContents.send('link-code', code);
   })
@@ -55,6 +58,8 @@ app.on('ready', () => {
   })
 
   server.getEmitter().on('stop', () => {
+    clearTimeout(slideTimeout);
+
     if(isDev = process.env.APP_DEV ? (process.env.APP_DEV.trim() == "true") : false)
       mainWindow.loadURL('http://localhost:5173/');
     else
@@ -97,6 +102,8 @@ app.on('ready', () => {
 let displaySlide = ( win ) => {
   server.getEmitter().emit('slide-change', currentSlideIndex);
   let currentSlide = config.slides[currentSlideIndex];
+
+  console.log(currentSlide);
 
   switch(currentSlide.type) {
     case 1:

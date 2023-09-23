@@ -23,6 +23,9 @@ let errorCodes: any = {
 }
 
 let slides: Slide[] = [];
+let playerTime = Date.now();
+let playerActive = false;
+let currentSlide: Slide | null = null;
 
 window.onload = () => {
   if(!localStorage.getItem('token'))return;
@@ -99,17 +102,22 @@ let main = async () => {
   console.log(slides);
 
   if(info.running){
-    let currentSlide = slides[info.index];
+    currentSlide = slides[info.index];
+    playerTime = info.lastChange + currentSlide.time;
 
     if(currentSlide.type == 1 && currentSlide.url)
       playerInfo.innerHTML = currentSlide.url;
   }
 
+  requestAnimationFrame(update);
+
   if(info.running){
+    playerActive = true;
     startButton.style.display = 'none';
     stopButton.style.display = 'inline-block';
     player.style.display = 'inline-flex';
   } else{
+    playerActive = false;
     startButton.style.display = 'inline-block';
     stopButton.style.display = 'none';
     player.style.display = 'none';
@@ -121,10 +129,13 @@ let main = async () => {
     let infoReq = await fetch('/api/v1', { headers: { token: localStorage.getItem('token')! }});
     info = await infoReq.json();
 
-    let currentSlide = slides[info.index];
+    if(info.running){
+      currentSlide = slides[info.index];
+      playerTime = info.lastChange + currentSlide.time;
 
-    if(currentSlide.type == 1 && currentSlide.url)
-      playerInfo.innerHTML = currentSlide.url;
+      if(currentSlide.type == 1 && currentSlide.url)
+        playerInfo.innerHTML = currentSlide.url;
+    }
   }, 1000);
 }
 
@@ -141,11 +152,7 @@ startButton.onclick = async () => {
     return;
   }
 
-  let currentSlide = slides[res.index];
-
-  if(currentSlide.type == 1 && currentSlide.url)
-    playerInfo.innerHTML = currentSlide.url;
-
+  playerActive = true;
   startButton.style.display = 'none';
   stopButton.style.display = 'inline-block';
   player.style.display = 'inline-flex';
@@ -164,11 +171,9 @@ stopButton.onclick = async () => {
     return;
   }
 
-  let currentSlide = slides[res.index];
+  currentSlide = null;
 
-  if(currentSlide.type == 1 && currentSlide.url)
-    playerInfo.innerHTML = currentSlide.url;
-
+  playerActive = false;
   startButton.style.display = 'inline-block';
   stopButton.style.display = 'none';
   player.style.display = 'none';
@@ -186,6 +191,11 @@ nextButton.onclick = async () => {
     new Alert('Error', errorCodes[res.err], 5000);
     return;
   }
+
+  currentSlide = slides[res.index];
+
+  if(currentSlide.type == 1 && currentSlide.url)
+    playerInfo.innerHTML = currentSlide.url;
 }
 
 prevButton.onclick = async () => {
@@ -199,5 +209,19 @@ prevButton.onclick = async () => {
   if(!res.ok){
     new Alert('Error', errorCodes[res.err], 5000);
     return;
+  }
+
+  currentSlide = slides[res.index];
+
+  if(currentSlide.type == 1 && currentSlide.url)
+    playerInfo.innerHTML = currentSlide.url;
+}
+
+let update = () => {
+  requestAnimationFrame(update);
+
+  if(playerActive && currentSlide){
+    let x = 100 - (((playerTime - Date.now()) / currentSlide.time) * 100);
+    player.style.background = 'linear-gradient(to right, #006c86 ' + x + '%, #111 ' + x + '%)'
   }
 }
