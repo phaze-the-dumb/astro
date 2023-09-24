@@ -1,0 +1,87 @@
+name: 'Build App'
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.17.x
+          cache: yarn
+
+      - name: Install Deps
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: install
+
+      - name: Install UI Deps
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: install
+          dir: gui
+
+      - name: Build UI
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: build
+          dir: gui
+
+          
+      - name: Install Panel Deps
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: install
+          dir: panel
+
+      - name: Build Panel
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: build
+          dir: panel
+
+      - name: Build Electron App
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: dist
+
+      - name: Get Version
+        id: extract_version
+        uses: Saionaro/extract-package-version@v1.2.1
+
+      - name: Create Draft Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          tag_name: ${{ steps.extract_version.outputs.version }}
+          release_name: ${{ steps.extract_version.outputs.version }} Release
+          draft: true
+          prerelease: false
+
+      - name: Archive Release
+        uses: thedoctor0/zip-release@0.7.1
+        with:
+          type: 'tar'
+          filename: 'build.tar.gz'
+          path: dist/win-unpacked
+
+      - name: Upload Build
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build.tar.gz
+          asset_name: ${{ steps.extract_version.outputs.version }}-release.tar.gz
+          asset_content_type: application/zip
