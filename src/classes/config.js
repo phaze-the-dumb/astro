@@ -15,6 +15,7 @@ class Config {
 
     this.autoStart = json.autoStart;
     this.showAddr = json.showAddr;
+    this.passcode = json.passcode;
   }
 
   save(){
@@ -55,7 +56,8 @@ class Config {
 Config.DefaultConfig = {
   slides: [],
   autoStart: true,
-  showAddr: true
+  showAddr: true,
+  passcode: null
 }
 
 module.exports = { Config };

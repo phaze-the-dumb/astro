@@ -22,6 +22,9 @@
       <div class="control-buttons">
         <div class="button" id="start-button">Start</div>
         <div class="button" id="stop-button">Stop</div>
+        <div class="button" id="settings-button">
+          <i class="fa-solid fa-gear"></i>
+        </div>
       </div><br />
 
       <div class="player">
@@ -107,6 +110,28 @@
         </div>
 
       </div>
+    </div>
+
+    <div class="settings">
+      <span style="font-size: 20px;">Settings</span><br /><br />
+
+      <div class="setting-toggle">
+        <span>Autostart slides </span>
+        <label class="switch">
+          <input type="checkbox" id="setting-autostart">
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="setting-toggle">
+        <span>Show panel address in corner </span>
+        <label class="switch">
+          <input type="checkbox" id="setting-showaddr">
+          <span class="slider round"></span>
+        </label>
+      </div><br />
+
+      <div class="button" id="settings-close">Close</div>
     </div>
 
     <div class="loading-indicator"></div>
