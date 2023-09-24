@@ -5,6 +5,8 @@ const os = require('os');
 const { Config } = require('./classes/config');
 const server = require('./backend/server');
 
+app.commandLine.appendSwitch('ignore-certificate-errors');
+
 if(!fs.existsSync(path.join(os.homedir(), './AppData/Roaming/PhazeDev/.config/')))
   fs.mkdirSync(path.join(os.homedir(), './AppData/Roaming/PhazeDev/.config/'), { recursive: true });
 
@@ -55,6 +57,7 @@ app.on('ready', () => {
 
   server.getEmitter().on('start', () => {
     mainWindow.webContents.send('unload');
+    currentSlideIndex = 0;
 
     setTimeout(() => {
       displaySlide(mainWindow);

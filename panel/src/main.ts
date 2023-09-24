@@ -1,4 +1,5 @@
 import './style.css';
+import './settings.ts';
 import { Alert } from './notifications';
 import { Input } from './input';
 import { Slide } from './slide';
@@ -188,6 +189,9 @@ let main = async () => {
   setInterval(async () => {
     let infoReq = await fetch('/api/v1', { headers: { token: localStorage.getItem('token')! }});
     info = await infoReq.json();
+
+    if(info.err === 'TOKEN_INVALID')
+      return window.location.reload();
 
     if(info.running){
       currentSlide = slides[info.index];

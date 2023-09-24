@@ -148,9 +148,14 @@ fastify.get('/api/v1/stop', ( req, reply ) => {
   reply.send({ ok: true });
 })
 
+fastify.get('/api/v1/settings', ( req, reply ) => {
+  if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
+  reply.send({ ok: true, autoStart: configData.autoStart, showAddr: configData.showAddr });
+})
+
 fastify.put('/api/v1/settings/autoStart', ( req, reply ) => {
   if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
-  if(!req.body || !req.body.value)return reply.send({ ok: false, err: 'VALUE_INVALID' });
+  if(!req.body || req.body.value === undefined)return reply.send({ ok: false, err: 'VALUE_INVALID' });
 
   configData.autoStart = req.body.value;
   configData.save();
@@ -160,7 +165,7 @@ fastify.put('/api/v1/settings/autoStart', ( req, reply ) => {
 
 fastify.put('/api/v1/settings/showAddr', ( req, reply ) => {
   if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
-  if(!req.body || !req.body.value)return reply.send({ ok: false, err: 'VALUE_INVALID' });
+  if(!req.body || req.body.value === undefined)return reply.send({ ok: false, err: 'VALUE_INVALID' });
 
   configData.showAddr = req.body.value;
   configData.save();
