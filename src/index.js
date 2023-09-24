@@ -4,10 +4,10 @@ const fs = require('fs');
 const { Config } = require('./classes/config');
 const server = require('./backend/server');
 
-if(!fs.existsSync(path.join(__dirname, './config.json')))
-  fs.writeFileSync(path.join(__dirname, './config.json'), JSON.stringify(Config.DefaultConfig));
+if(!fs.existsSync(path.join(__dirname, '../config.json')))
+  fs.writeFileSync(path.join(__dirname, '../config.json'), JSON.stringify(Config.DefaultConfig));
 
-let config = new Config(path.join(__dirname, './config.json'));
+let config = new Config(path.join(__dirname, '../config.json'));
 server.config(config);
 
 let slideTimeout = null;
