@@ -95,7 +95,7 @@ fastify.put('/api/v1/slides', ( req, reply ) => {
   emitter.emit('slides-update', 0, slide);
 
   configData.addSlide(slide);
-  reply.send({ ok: true, slides: configData.slides });
+  reply.send({ ok: true, slide });
 })
 
 fastify.put('/api/v1/slides/:id', ( req, reply ) => {
