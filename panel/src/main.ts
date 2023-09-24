@@ -535,9 +535,12 @@ creatorCreate.onclick = async () => {
   let s = new Slide();
   slides.push(s);
 
+  creatorSlideUrl.input.value = '';
+
   s.time = time;
   s.type = type;
   s.url = url;
+  s.id = res.slide.id;
 
   if(s.type == 1 && s.url){
     let slide = document.createElement('div');
