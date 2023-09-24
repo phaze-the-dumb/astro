@@ -34,6 +34,78 @@
         <div class="player-next" id="next-button">
           <i class="fa-solid fa-forward-step"></i>
         </div>
+      </div><br /><br />
+
+      <div class="slides">
+
+        <div class="slide-creator">
+          <div class="creator-choose-type">
+            <div class="options">
+              <div class="option" id="creator-choose-type-app">
+                <i class="fa-brands fa-codepen"></i><br />
+                Application
+              </div>
+              <div class="option" id="creator-choose-type-web">
+                <i class="fa-solid fa-globe"></i><br />
+                Website
+              </div>
+            </div>
+
+            <div class="button creator-cancel">Cancel</div>
+          </div>
+
+          <div class="creator-choose-app">
+            <p style="margin: 50px;">Applications have no yet been implemented, please check back later.</p>
+
+            <div class="button" id="creator-choose-app-back">Back</div>
+            <div class="button creator-cancel">Cancel</div>
+          </div>
+
+          <div class="creator-choose-url" style="margin: 50px;">
+            <p id="creator-choose-url-error"></p>
+
+            <input type="text" id="creator-slide-url-input" autocomplete="off">
+            <div class="button" id="creator-slide-url">Submit</div><br /><br />
+
+            <div class="button" id="creator-choose-url-back">Back</div>
+            <div class="button creator-cancel">Cancel</div>
+          </div>
+
+          <div class="creator-choose-time" style="margin: 25px;">
+            <div class="time">
+              <span id="creator-time">1 Minute</span><br />
+              <input type="range" min="1" max="120" id="creator-time-input">
+            </div><br /><br />
+
+            <div class="button" id="creator-create">Submit</div>
+            <div class="button" id="creator-choose-time-back">Back</div>
+            <div class="button creator-cancel">Cancel</div>
+          </div>
+        </div>
+
+        <div class="slide-editor"><br />
+          <div class="type">loading...</div><br />
+
+          <input type="text" id="slide-url-input" autocomplete="off"><br /><br />
+
+          <div class="time">
+            <span id="editor-time">1 Minute</span><br />
+            <input type="range" min="1" max="120" id="editor-time-input">
+          </div><br /><br />
+
+          <div class="button-warning" id="slide-delete">Delete</div>
+          <div class="button" id="editor-button">Cancel</div>
+          <div class="button" id="slide-url">Update</div>
+        </div>
+
+        <div class="slide-scroller">
+          <div class="slide" id="new-slide">
+            <div class="text" style="text-align: center; width: 100%;">
+              New Slide
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 

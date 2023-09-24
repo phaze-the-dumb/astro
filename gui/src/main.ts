@@ -92,7 +92,7 @@ let main = () => {
     let title = '';
     let body = '';
 
-    title = type == 0 ? 'Slide Added' : 'Slide Removed';
+    title = type == 0 ? 'Slide Added' : type == 1 ? 'Slide Removed' : 'Slide Updated';
     body = slide.type == 1 ? slide.url! : slide.appId!;
 
     new Alert(title, body, 5000);

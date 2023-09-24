@@ -41,6 +41,15 @@ class Config {
     this.slides = this.slides.filter(x => x.id !== id);
     this.save();
   }
+
+  updateSlide( id, slide ){
+    let s = this.slides.find(x => x.id === id);
+
+    s.time = slide.time;
+    s.appId = slide.appId;
+    s.type = slide.type;
+    s.url = slide.url;
+  }
 }
 
 Config.DefaultConfig = {

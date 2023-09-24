@@ -103,8 +103,6 @@ let displaySlide = ( win ) => {
   server.getEmitter().emit('slide-change', currentSlideIndex);
   let currentSlide = config.slides[currentSlideIndex];
 
-  console.log(currentSlide);
-
   switch(currentSlide.type) {
     case 1:
       win.loadURL(currentSlide.url);

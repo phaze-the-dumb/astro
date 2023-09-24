@@ -21,6 +21,21 @@ body{
   border: 2px #555 solid;
 }
 
+.button-warning{
+  padding: 10px 15px;
+  display: inline-block;
+  background: #511;
+  border-radius: 10px;
+  user-select: none;
+  cursor: pointer;
+  border: 2px #511 solid;
+  transition: 0.5s;
+}
+
+.button-warning:hover{
+  border: 2px #f00 solid;
+}
+
 .title{
   position: fixed;
   top: 10px;
@@ -156,6 +171,108 @@ input[type="text"]:focus{
   align-items: center;
   height: 40px;
   color: #ccc;
+}
+
+.slides{
+  border-radius: 10px;
+  background: #000;
+  display: inline-block;
+  width: 300px;
+  height: 400px;
+  transition: 0.5s;
+}
+
+.slide-scroller{
+  padding: 10px;
+  padding-top: 150px;
+  padding-bottom: 150px;
+  overflow: auto;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #fff, transparent);
+  mask-image: linear-gradient(to bottom, transparent 0%, #fff 25%, #fff 75%, transparent 100%);
+  width: 300px;
+  box-sizing: border-box;
+  height: 400px;
+  transition: 0.5s;
+  scroll-behavior: smooth;
+  display: inline-block;
+}
+
+.slide-editor{
+  display: none;
+  opacity: 0;
+  transition: 0.5s;
+}
+
+.slide{
+  text-align: left;
+  padding: 10px 5px;
+  margin: 5px 0;
+  transition: 0.1s;
+  border-radius: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.slide:hover{
+  background: #fff5;
+}
+
+.slide .text{
+  display: inline-block;
+  text-align: left;
+  width: calc(100% - 30px);
+}
+
+.slide .edit-button{
+  text-align: right;
+  display: inline-block;
+  width: 25px;
+}
+
+.slide-editor .type{
+  font-size: 25px;
+}
+
+.slide-creator{
+  display: none;
+  transition: 0.5s;
+  opacity: 0;
+}
+
+.creator-choose-type, .creator-choose-app, .creator-choose-url, .creator-choose-time{
+  display: none;
+}
+
+.options{
+  width: 100%;
+  height: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.options .option i{
+  font-size: 50px;
+}
+
+.options .option{
+  width: 100%;
+  margin: 20px;
+  padding: 20px 0;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  border: #111 5px solid;
+  border-radius: 10px;
+  transition: 0.5s;
+}
+
+.options .option:hover{
+  border: #555 5px solid;
+}
+
+.options .selected{
+  border: #fff 5px solid;
 }
 
 @keyframes loading{

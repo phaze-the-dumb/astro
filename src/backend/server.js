@@ -98,6 +98,23 @@ fastify.put('/api/v1/slides', ( req, reply ) => {
   reply.send({ ok: true, slides: configData.slides });
 })
 
+fastify.put('/api/v1/slides/:id', ( req, reply ) => {
+  if(isStarted)return reply.send({ ok: false, err: 'STARTED' });
+
+  if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
+  if(!req.params.id)return reply.send({ ok: false, err: 'ID_INVALID' });
+
+  if(!req.body || !req.body.time || !req.body.type || !req.body.time)return reply.send({ ok: false, err: 'BODY_INVALID' });
+
+  if(req.body.type == 0 && !req.body.appId)return reply.send({ ok: false, err: 'APPID_INVALID' });
+  else if(req.body.type == 1 && !req.body.url)return reply.send({ ok: false, err: 'URL_INVALID' });
+
+  emitter.emit('slides-update', 2, configData.slides.find(x => x.id === req.params.id));
+
+  configData.updateSlide(req.params.id, req.body);
+  reply.send({ ok: true, slides: configData.slides });
+})
+
 fastify.delete('/api/v1/slides/:id', ( req, reply ) => {
   if(isStarted)return reply.send({ ok: false, err: 'STARTED' });
 
