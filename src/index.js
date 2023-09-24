@@ -1,13 +1,17 @@
 const { app, BrowserWindow, ipcMain, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const { Config } = require('./classes/config');
 const server = require('./backend/server');
 
-if(!fs.existsSync(path.join(__dirname, '../config.json')))
-  fs.writeFileSync(path.join(__dirname, '../config.json'), JSON.stringify(Config.DefaultConfig));
+if(!fs.existsSync(path.join(os.homedir(), './AppData/Roaming/PhazeDev/.config/')))
+  fs.mkdirSync(path.join(os.homedir(), './AppData/Roaming/PhazeDev/.config/'), { recursive: true });
 
-let config = new Config(path.join(__dirname, '../config.json'));
+if(!fs.existsSync(path.join(os.homedir(), './AppData/Roaming/PhazeDev/.config/astro.json')))
+  fs.writeFileSync(path.join(os.homedir(), './AppData/Roaming/PhazeDev/.config/astro.json'), JSON.stringify(Config.DefaultConfig));
+
+let config = new Config(path.join(os.homedir(), './AppData/Roaming/PhazeDev/.config/astro.json'));
 server.config(config);
 
 let slideTimeout = null;
