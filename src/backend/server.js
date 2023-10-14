@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 const { Slide } = require('../classes/slide');
+const apps = require('./apploader');
 
 let emitter = new EventEmitter();
 let code = null;
@@ -12,10 +13,15 @@ let isStarted = false;
 let configData = null;
 let currentSlide = 0;
 let lastTime = Date.now();
+let appSlides = [];
 
 emitter.on('slide-change', ( index ) => {
   currentSlide = index;
   lastTime = Date.now();
+})
+
+emitter.on('registerSlide', ( slide ) => {
+  appSlides.push(slide);
 })
 
 fastify.get('/', ( req, reply ) => {
@@ -71,13 +77,27 @@ fastify.get('/api/v1/slides', ( req, reply ) => {
   reply.send({ ok: true, slides: configData.slides });
 })
 
+fastify.get('/api/v1/apps/slides', ( req, reply ) => {
+  if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
+  reply.send({ ok: true, slides: appSlides.map(x => { return { name: x.name, id: x.id } }) });
+})
+
+fastify.get('/api/v1/apps/slides/:slide', ( req, reply ) => {
+  if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
+
+  let slide = appSlides.find(x => x.id === req.params.slide);
+  if(!slide)return reply.send({ ok: false, err: 'SLIDE_INVALID' });
+
+  reply.send({ ok: true, options: slide.opts, id: slide.id, name: slide.name });
+})
+
 fastify.get('/api/v1', ( req, reply ) => {
   if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
   reply.send({ ok: true, running: isStarted, index: currentSlide, lastChange: lastTime });
 })
 
 fastify.put('/api/v1/slides', ( req, reply ) => {
-  if(isStarted)return reply.send({ ok: false, err: 'STARTED' });
+  // if(isStarted)return reply.send({ ok: false, err: 'STARTED' });
 
   if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
   if(!req.body || !req.body.time || !req.body.type || !req.body.time)return reply.send({ ok: false, err: 'BODY_INVALID' });
@@ -99,7 +119,7 @@ fastify.put('/api/v1/slides', ( req, reply ) => {
 })
 
 fastify.put('/api/v1/slides/:id', ( req, reply ) => {
-  if(isStarted)return reply.send({ ok: false, err: 'STARTED' });
+  // if(isStarted)return reply.send({ ok: false, err: 'STARTED' });
 
   if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
   if(!req.params.id)return reply.send({ ok: false, err: 'ID_INVALID' });
@@ -116,7 +136,7 @@ fastify.put('/api/v1/slides/:id', ( req, reply ) => {
 })
 
 fastify.delete('/api/v1/slides/:id', ( req, reply ) => {
-  if(isStarted)return reply.send({ ok: false, err: 'STARTED' });
+  // if(isStarted)return reply.send({ ok: false, err: 'STARTED' });
 
   if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
   if(!req.params.id)return reply.send({ ok: false, err: 'ID_INVALID' });
@@ -146,6 +166,11 @@ fastify.get('/api/v1/stop', ( req, reply ) => {
 
   isStarted = false;
   reply.send({ ok: true });
+})
+
+fastify.get('/api/v1/appslides', ( req, reply ) => {
+  if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
+  reply.send({ ok: true, apps: appSlides.map(x => x.name) });
 })
 
 fastify.get('/api/v1/settings', ( req, reply ) => {
@@ -196,5 +221,9 @@ let config = ( c ) => {
 
   if(configData.autoStart && configData.slides.length > 0)
     isStarted = true;
+
+  apps.config(configData, emitter);
+  apps.loadApps();
 };
+
 module.exports = { getEmitter: () => emitter, config, getActive: () => isStarted };
