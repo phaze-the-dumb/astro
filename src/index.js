@@ -5,6 +5,7 @@ const os = require('os');
 const { Config } = require('./classes/config');
 const server = require('./backend/server');
 
+// Usually this would be a very bad idea, but this app is needed to be able to open websites with self signed certs.
 app.commandLine.appendSwitch('ignore-certificate-errors');
 
 if(!fs.existsSync(path.join(os.homedir(), './AppData/Roaming/PhazeDev/.config/')))

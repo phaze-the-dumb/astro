@@ -38,6 +38,7 @@ let slideCreator = document.querySelector<HTMLElement>('.slide-creator')!;
 let creatorCreate = document.querySelector<HTMLElement>('#creator-create')!;
 let slidesContainer = document.querySelector<HTMLElement>('.slides')!;
 let slideEditorContainer = document.querySelector<HTMLElement>('.slide-editor')!;
+let appListContainer = document.querySelector<HTMLElement>('.app-list-container')!;
 let linkCode = new Input('submit-code');
 let slideUrl = new Input('slide-url');
 let creatorSlideUrl = new Input('creator-slide-url');
@@ -60,6 +61,7 @@ let playerActive = false;
 let currentSlide: Slide | null = null;
 let currentSlideId: string | null = null;
 let creatorType: number | null = null;
+let creatorAppSlide: any = null;
 
 window.onload = () => {
   if(!localStorage.getItem('token'))return;
@@ -142,7 +144,11 @@ let main = async () => {
 
       let text = document.createElement('div');
       text.className = 'text';
-      text.innerHTML = s.url;
+
+      if(s.url.length > 20)
+        text.innerHTML = s.url.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
+      else
+        text.innerHTML = s.url.replace('https://', '').replace('http://', '').slice(0, 20);
 
       let edit = document.createElement('div');
       edit.className = 'edit-button';
@@ -164,8 +170,12 @@ let main = async () => {
     currentSlide = slides[info.index];
     playerTime = info.lastChange + currentSlide.time;
 
-    if(currentSlide.type == 1 && currentSlide.url)
-      playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '');
+    if(currentSlide.type == 1 && currentSlide.url){
+      if(currentSlide.url.length > 20)
+        playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
+      else
+        playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '')
+    }
   }
 
   requestAnimationFrame(update);
@@ -175,7 +185,7 @@ let main = async () => {
     startButton.style.display = 'none';
     stopButton.style.display = 'inline-block';
     player.style.display = 'inline-flex';
-    slidesContainer.style.display = 'none';
+    slidesContainer.style.display = 'inline-block';
   } else{
     playerActive = false;
     startButton.style.display = 'inline-block';
@@ -197,8 +207,12 @@ let main = async () => {
       currentSlide = slides[info.index];
       playerTime = info.lastChange + currentSlide.time;
 
-      if(currentSlide.type == 1 && currentSlide.url)
-        playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '');
+      if(currentSlide.type == 1 && currentSlide.url){
+        if(currentSlide.url.length > 20)
+          playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
+        else
+          playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '')
+      }
     }
   }, 1000);
 }
@@ -228,7 +242,7 @@ startButton.onclick = async () => {
   startButton.style.display = 'none';
   stopButton.style.display = 'inline-block';
   player.style.display = 'inline-flex';
-  slidesContainer.style.display = 'none';
+  slidesContainer.style.display = 'inline-block';
 }
 
 stopButton.onclick = async () => {
@@ -476,11 +490,59 @@ creatorCancel.forEach(btn => {
   }
 })
 
-creatorChooseTypeApp.onclick = () => {
+creatorChooseTypeApp.onclick = async () => {
   creatorChooseType.style.display = 'none';
   creatorChooseApp.style.display = 'block';
 
   creatorType = 0;
+
+  let req = await fetch('/api/v1/apps/slides', { headers: { 'Content-Type': 'application/json', token: localStorage.getItem('token')! } });
+  let res = await req.json();
+
+  for(let slide of res.slides){
+    let div = document.createElement('div');
+    div.innerHTML = slide.name;
+    div.className = 'app-selector';
+
+    div.onclick = () => {
+      applicationPicked(slide.id);
+    }
+
+    appListContainer.appendChild(div);
+  }
+}
+
+let applicationPicked = async ( id: string ) => {
+  let optionsReq = await fetch('/api/v1/apps/slides/' + id, { headers: { token: localStorage.getItem('token')! } });
+  let options = await optionsReq.json();
+
+  creatorAppSlide = options;
+  displayAppOpt(0);
+}
+
+let displayAppOpt = ( index: number ) => {
+  if(!creatorAppSlide)
+    return new Alert('Invaild', 'Cannot display options of an app that doesn\'t exist.', 5000);
+
+  let options = Object.keys(creatorAppSlide.options);
+  let opt = options[index];
+
+  if(!opt)
+    return new Alert('Invaild', 'Cannot display an option of an app that doesn\'t exist.', 5000);
+
+  let info = creatorAppSlide.options[opt];
+
+  let title = opt;
+  title = title[0].toUpperCase() + title.substring(1);
+
+  console.log(title, info);
+  switch(info.type){
+    case 'String':
+      break;
+    default:
+      new Alert('Invaild Type', info.type + ' is an invaild type', 5000);
+      break;
+  }
 }
 
 creatorChooseAppBackBtn.onclick = () => {

@@ -290,6 +290,27 @@ input[type="text"]:focus{
   display: none;
 }
 
+.app-list-container{
+  overflow: auto;
+  height: 150px;
+  scroll-behavior: smooth;
+}
+
+.app-selector{
+  border: #111 2px solid;
+  margin: 10px;
+  padding: 10px 0;
+  border-radius: 10px;
+  transition: 0.5s;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.app-selector:hover{
+  border: #555 2px solid;
+}
+
 .switch {
   position: relative;
   display: inline-block;
