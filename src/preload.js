@@ -1,13 +1,17 @@
+// This script is run on all pages the app loads
+
 const { contextBridge, ipcRenderer } = require('electron');
 const ip = require('ip');
 let alerts = [];
 
+// Inject our custom styles into the web page
 let styles = document.createElement('style');
 styles.innerHTML = `
 .alert{z-index: 100000000000;position: fixed;top: 50px;left: -430px;width: 400px;background: rgba(68, 68, 68, 0.568);backdrop-filter: blur(10px);min-height: 70px;border-bottom: #00ccff 10px solid;font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;padding: 10px;color: white;transition: 0.5s;box-shadow: #0005 0 0 10px;opacity: 0;}
 .alert-title{font-size: 25px;}
 .alert-body{display: flex;justify-content: left;align-items: center;height: 40px;color: #ccc;font-size: 15px;}`
 
+// Define "Alert" class
 class Alert{
   constructor( title, body, time ){
     alerts.forEach(a => a.moveDown());
@@ -71,13 +75,16 @@ class Alert{
   }
 }
 
+// Make events accessible by external site
 contextBridge.exposeInMainWorld('electronAPI', {
   on: ( event, cb ) => ipcRenderer.on(event, cb)
 })
 
+// Hook load event
 window.addEventListener('load', () => {
   ipcRenderer.send('getConfig');
 
+  // If we have show address option enabled load the address in the bottom right corner
   ipcRenderer.on('getConfig', ( event, config ) => {
     console.log(config);
     if(config.showAddr){
@@ -95,9 +102,11 @@ window.addEventListener('load', () => {
     }
   })
 
+  // Add our custom styles to the page
   document.body.appendChild(styles);
 });
 
+// Hook slide update event so we can show alerts for that
 ipcRenderer.on('slides-update', ( _event, type, slide ) => {
   let title = '';
   let body = '';

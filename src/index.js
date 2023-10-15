@@ -1,3 +1,4 @@
+// Imports
 const { app, BrowserWindow, ipcMain, nativeImage, session } = require('electron');
 const path = require('path');
 const fs = require('fs');
@@ -9,12 +10,14 @@ const adblockRust = require('adblock-rs');
 // Usually this would be a very bad idea, but this app is needed to be able to open websites with self signed certs.
 app.commandLine.appendSwitch('ignore-certificate-errors');
 
+// Check if config files exist, if not create them
 if(!fs.existsSync(path.join(os.homedir(), './AppData/Roaming/PhazeDev/.config/')))
   fs.mkdirSync(path.join(os.homedir(), './AppData/Roaming/PhazeDev/.config/'), { recursive: true });
 
 if(!fs.existsSync(path.join(os.homedir(), './AppData/Roaming/PhazeDev/.config/astro.json')))
   fs.writeFileSync(path.join(os.homedir(), './AppData/Roaming/PhazeDev/.config/astro.json'), JSON.stringify(Config.DefaultConfig));
 
+// Load the config into the config class (./classes/config.js)
 let config = new Config(path.join(os.homedir(), './AppData/Roaming/PhazeDev/.config/astro.json'));
 server.config(config);
 
