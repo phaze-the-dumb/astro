@@ -5,7 +5,6 @@ const path = require('path');
 const fs = require('fs');
 const { Slide } = require('../classes/slide');
 const apps = require('./apploader');
-const { screen } = require('electron');
 
 let emitter = new EventEmitter();
 let code = null;

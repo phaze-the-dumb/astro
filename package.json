@@ -16,6 +16,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "adblock-rs": "^0.8.1",
     "electron-squirrel-startup": "^1.0.0",
     "fastify": "^4.23.2",
     "ip": "^1.1.8"

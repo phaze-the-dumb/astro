@@ -228,6 +228,13 @@ abstract-logging@^2.0.1:
   resolved "https://registry.yarnpkg.com/abstract-logging/-/abstract-logging-2.0.1.tgz#6b0c371df212db7129b57d2e7fcf282b8bf1c839"
   integrity sha512-2BjRTZxTPvheOvGbBslFSYOUkr+SjPtOnrLP33f+VIWLzezQpZcqVg7ja3L4dBXmzzgwT+a029jRx5PCi3JuiA==
 
+adblock-rs@^0.8.1:
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/adblock-rs/-/adblock-rs-0.8.1.tgz#0fe5ea4876da49b2d10b4e827366da20f14a3424"
+  integrity sha512-DVApbnjGsGJgkK/puOzi4tDN+TXO822jPmxR8cFVlXK+0LoZrolW8EtrF84Df9CMQomTjrlANyWWIrHq4QBWLQ==
+  dependencies:
+    cargo-cp-artifact "^0.1"
+
 agent-base@6:
   version "6.0.2"
   resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-6.0.2.tgz#49fff58577cfee3f37176feab4c22e00f86d7f77"
@@ -492,6 +499,11 @@ cacheable-request@^7.0.2:
     lowercase-keys "^2.0.0"
     normalize-url "^6.0.1"
     responselike "^2.0.0"
+
+cargo-cp-artifact@^0.1:
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/cargo-cp-artifact/-/cargo-cp-artifact-0.1.8.tgz#353814f49f6aa76601a4bcb3ea5f3071180b90de"
+  integrity sha512-3j4DaoTrsCD1MRkTF2Soacii0Nx7UHCce0EwUf4fHnggwiE4fbmF2AbnfzayR36DF8KGadfh7M/Yfy625kgPlA==
 
 chalk@^4.0.2, chalk@^4.1.2:
   version "4.1.2"

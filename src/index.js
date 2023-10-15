@@ -1,9 +1,10 @@
-const { app, BrowserWindow, ipcMain, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, nativeImage, session } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const { Config } = require('./classes/config');
 const server = require('./backend/server');
+const adblockRust = require('adblock-rs');
 
 // Usually this would be a very bad idea, but this app is needed to be able to open websites with self signed certs.
 app.commandLine.appendSwitch('ignore-certificate-errors');
@@ -19,8 +20,34 @@ server.config(config);
 
 let slideTimeout = null;
 let currentSlideIndex = 0;
+let currentUrl = 'http://localhost';
+
+const filterSet = new adblockRust.FilterSet(false);
+
+let easylistFilters = fs.readFileSync(__dirname + '/data/easylist.txt', { encoding: 'utf-8' }).split('\n');
+filterSet.addFilters(easylistFilters);
+
+let uboUnbreakFilters = fs.readFileSync(__dirname + '/data/unbreak.txt', { encoding: 'utf-8' }).split('\n');
+filterSet.addFilters(uboUnbreakFilters);
+
+const resources = adblockRust.uBlockResources(
+  __dirname + '/data/fake-uBO-files/web_accessible_resources',
+  __dirname + '/data/fake-uBO-files/redirect-resources.js',
+  __dirname + '/data/fake-uBO-files/scriptlets.js'
+);
+
+const engine = new adblockRust.Engine(filterSet, false);
+engine.useResources(resources);
 
 app.on('ready', () => {
+  session.defaultSession.webRequest.onBeforeRequest({ urls: [ '*://*/*' ] }, ( details, callback ) => {
+    if(engine.check(details.url, currentUrl, 'script')){
+      callback({ cancel: true });
+    } else{
+      callback({ cancel: false });
+    }
+  })
+
   const mainWindow = new BrowserWindow({
     fullscreen: true,
     webPreferences: {
@@ -67,6 +94,7 @@ app.on('ready', () => {
 
   server.getEmitter().on('stop', () => {
     clearTimeout(slideTimeout);
+    currentUrl = 'http://localhost';
 
     if(isDev = process.env.APP_DEV ? (process.env.APP_DEV.trim() == "true") : false)
       mainWindow.loadURL('http://localhost:5173/');
@@ -113,6 +141,7 @@ let displaySlide = ( win ) => {
 
   switch(currentSlide.type) {
     case 1:
+      currentUrl = currentSlide.url;
       win.loadURL(currentSlide.url);
       break;
   }
