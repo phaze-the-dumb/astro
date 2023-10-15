@@ -1,6 +1,4 @@
 import './style.css';
-import { Alert } from './notifications';
-import { Slide } from './slide';
 
 setTimeout(() => {
   main();
@@ -86,15 +84,5 @@ let main = () => {
   window.electronAPI.on('unload', ( _event: any ) => {
     let title = document.querySelector<HTMLElement>('.title')!;
     title.style.opacity = '0';
-  });
-
-  window.electronAPI.on('slides-update', ( _event: any, type: number, slide: Slide ) => {
-    let title = '';
-    let body = '';
-
-    title = type == 0 ? 'Slide Added' : type == 1 ? 'Slide Removed' : 'Slide Updated';
-    body = slide.type == 1 ? slide.url! : slide.appId!;
-
-    new Alert(title, body, 5000);
   });
 }
