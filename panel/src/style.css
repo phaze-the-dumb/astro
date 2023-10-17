@@ -21,6 +21,21 @@ body{
   border: 2px #555 solid;
 }
 
+.button-good{
+  padding: 10px 15px;
+  display: inline-block;
+  background: #151;
+  border-radius: 10px;
+  user-select: none;
+  cursor: pointer;
+  border: 2px #151 solid;
+  transition: 0.5s;
+}
+
+.button-good:hover{
+  border: 2px #0f0 solid;
+}
+
 .button-warning{
   padding: 10px 15px;
   display: inline-block;
@@ -288,6 +303,8 @@ input[type="text"]:focus{
   height: 150px;
   text-align: center;
   display: none;
+  opacity: 0;
+  transition: 0.5s;
 }
 
 .app-list-container{
@@ -367,6 +384,19 @@ input:checked + .slider:before {
 
 .slider.round:before {
   border-radius: 50%;
+}
+
+.settings-backdrop{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0002;
+  backdrop-filter: blur(2px);
+  transition: 0.5s;
+  opacity: 0;
+  display: none;
 }
 
 @keyframes loading{

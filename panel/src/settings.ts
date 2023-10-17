@@ -4,6 +4,7 @@ let settingsButton = document.querySelector<HTMLElement>('#settings-button')!;
 let settingsCloseBtn = document.querySelector<HTMLElement>('#settings-close')!;
 let settingsShowAddr = document.querySelector<HTMLInputElement>('#setting-showaddr')!;
 let settingsAutoStart = document.querySelector<HTMLInputElement>('#setting-autostart')!;
+let settingsBackdrop = document.querySelector<HTMLInputElement>('.settings-backdrop')!;
 let settingsContainer = document.querySelector<HTMLElement>('.settings')!;
 
 settingsButton.onclick = async () => {
@@ -37,11 +38,36 @@ settingsButton.onclick = async () => {
   };
 
   settingsContainer.style.display = 'block';
+  settingsBackdrop.style.display = 'block';
+
+  setTimeout(() => {
+    settingsContainer.style.opacity = '1';
+    settingsBackdrop.style.opacity = '1';
+  }, 10)
 }
 
 settingsCloseBtn.onclick = () => {
-  settingsContainer.style.display = 'none';
-
   settingsShowAddr.onchange = () => {};
   settingsAutoStart.onchange = () => {};
+
+  settingsBackdrop.style.opacity = '0';
+  settingsContainer.style.opacity = '0';
+
+  setTimeout(() => {
+    settingsBackdrop.style.display = 'none';
+    settingsContainer.style.display = 'none';
+  }, 500);
+}
+
+settingsBackdrop.onclick = () => {
+  settingsShowAddr.onchange = () => {};
+  settingsAutoStart.onchange = () => {};
+
+  settingsBackdrop.style.opacity = '0';
+  settingsContainer.style.opacity = '0';
+
+  setTimeout(() => {
+    settingsBackdrop.style.display = 'none';
+    settingsContainer.style.display = 'none';
+  }, 500);
 }

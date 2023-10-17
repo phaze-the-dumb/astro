@@ -36,7 +36,7 @@ class Alert{
     this.timeout = setTimeout(() => {
       this.div.style.left = '0';
       this.div.style.opacity = '1';
-  
+
       setTimeout(() => {
         this.remove();
       }, time);
