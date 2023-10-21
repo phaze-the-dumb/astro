@@ -1,3 +1,5 @@
+**Please do not attempt to add an application slide as it *will* break things**
+
 - Can now edit slides while slides are running
 - Alerts now show in slide
 - Fixed some animations on the web panel
@@ -11,3 +13,5 @@
 - Added a lot of comments
 - Added more error handling
 - Added error reporting
+- Apps now load, but do not run
+- You *can* technically add / remove apps on the web panel, but they do not do anything, and you cannot edit them

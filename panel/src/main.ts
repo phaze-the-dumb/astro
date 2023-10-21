@@ -186,6 +186,34 @@ let main = async () => {
       // Add slide to the list
       slidesScrolled.push(slide);
       slideScroller.insertBefore(slide, newSlideButton);
+    } else if (s.type == 0 && s.appId){
+      let slide = document.createElement('div');
+      slide.className = 'slide';
+
+      let text = document.createElement('div');
+      text.className = 'text';
+
+      // Make sure text length never exceeds 23 characters
+      if(s.appId.length > 20)
+        text.innerHTML = s.appId.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
+      else
+        text.innerHTML = s.appId.replace('https://', '').replace('http://', '').slice(0, 20);
+
+      let edit = document.createElement('div');
+      edit.className = 'edit-button';
+      edit.innerHTML = '<i class="fa-solid fa-pen"></i>';
+
+      slide.appendChild(text);
+      slide.appendChild(edit);
+
+      // When slide is clicked, open the slide settings menu
+      slide.onclick = () => {
+        slideEditor(s);
+      }
+
+      // Add slide to the list
+      slidesScrolled.push(slide);
+      slideScroller.insertBefore(slide, newSlideButton);
     }
   }
 
@@ -200,6 +228,11 @@ let main = async () => {
         playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
       else
         playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '')
+    } else if(currentSlide.type == 0 && currentSlide.appId){
+      if(currentSlide.appId.length > 20)
+        playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
+      else
+        playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '')
     }
 
     playerActive = true;
@@ -240,6 +273,11 @@ let main = async () => {
           playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
         else
           playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '')
+      } else if(currentSlide.type == 0 && currentSlide.appId){
+        if(currentSlide.appId.length > 20)
+          playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
+        else
+          playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '')
       }
     }
   }, 1000);
@@ -327,6 +365,11 @@ nextButton.onclick = async () => {
       playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
     else
       playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '')
+  } else if(currentSlide.type == 0 && currentSlide.appId){
+    if(currentSlide.appId.length > 20)
+      playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
+    else
+      playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '')
   }
 
   let infoReq = await fetch('/api/v1', { headers: { token: localStorage.getItem('token')! }});
@@ -362,6 +405,11 @@ prevButton.onclick = async () => {
       playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
     else
       playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '')
+  } else if(currentSlide.type == 0 && currentSlide.appId){
+    if(currentSlide.appId.length > 20)
+      playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
+    else
+      playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '')
   }
 
   let infoReq = await fetch('/api/v1', { headers: { token: localStorage.getItem('token')! }});
@@ -419,6 +467,25 @@ let slideEditor = ( slide: Slide ) => {
 
   slideUrl.clicked = async () => {
     // When the slide is updated
+    if(slide.type == 0){
+      slideEditorContainer.style.opacity = '0';
+      slidesContainer.style.width = '300px';
+
+      currentSlideId = null;
+
+      // Animate back to the slide list
+      setTimeout(() => {
+        slideEditorContainer.style.display = 'none';
+
+        slideScroller.style.display = 'inline-block';
+
+        setTimeout(() => {
+          slideScroller.style.opacity = '1';
+        }, 10)
+      }, 500);
+
+      return;
+    }
 
     let newUrl = slideUrl.input.value;
     let newTime = parseInt(editorTimeInput.value) * 1000;
@@ -771,12 +838,17 @@ creatorCreate.onclick = async () => {
 
     slidesScrolled.push(slide);
     slideScroller.insertBefore(slide, newSlideButton);
-  } else if(s.type == 0){
+  } else if(s.type == 0 && s.appId){
     let slide = document.createElement('div');
     slide.className = 'slide';
 
     let text = document.createElement('div');
     text.className = 'text';
+
+    if(s.appId.length > 20)
+      text.innerHTML = s.appId.replace('https://', '').replace('http://', '').slice(0, 20) + '...';
+    else
+      text.innerHTML = s.appId.replace('https://', '').replace('http://', '');
 
     let edit = document.createElement('div');
     edit.className = 'edit-button';
@@ -788,6 +860,9 @@ creatorCreate.onclick = async () => {
     slide.onclick = () => {
       slideEditor(s);
     }
+
+    slidesScrolled.push(slide);
+    slideScroller.insertBefore(slide, newSlideButton);
   }
 
   slideScroller.style.display = 'inline-block';

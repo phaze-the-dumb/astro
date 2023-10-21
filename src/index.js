@@ -3,7 +3,6 @@ const { app, BrowserWindow, ipcMain, nativeImage, session } = require('electron'
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const path = require('path');
 const { Config } = require('./classes/config');
 const server = require('./backend/server');
 const adblockRust = require('adblock-rs');
