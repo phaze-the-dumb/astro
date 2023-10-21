@@ -189,6 +189,17 @@ fastify.get('/api/v1/stop', ( req, reply ) => {
   reply.send({ ok: true });
 })
 
+fastify.put('/api/v1/apps/option', ( req, reply ) => {
+  // Updates options for an app
+  if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
+
+  let app = appSlides.find(x => x.id == req.query.slideId);
+  if(!app)return reply.send({ ok: false, err: 'ID_INVALID' });
+
+  app.emit('options', req.body.key, req.body.value);
+  reply.send({ ok: true });
+})
+
 fastify.get('/api/v1/settings', ( req, reply ) => {
   // Returns the current settings
 
@@ -255,4 +266,4 @@ let config = ( c ) => {
   apps.loadApps();
 };
 
-module.exports = { getEmitter: () => emitter, config, getActive: () => isStarted };
+module.exports = { getEmitter: () => emitter, config, getActive: () => isStarted, getAppSlides: () => appSlides };

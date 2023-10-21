@@ -294,7 +294,7 @@ startButton.onclick = async () => {
   loader.style.display = 'none';
 
   if(!res.ok){
-    new Alert('Error', errorCodes[res.err], 5000);
+    new Alert('Error', errorCodes[res.err] || res.err, 5000);
     return;
   }
 
@@ -327,7 +327,7 @@ stopButton.onclick = async () => {
   loader.style.display = 'none';
 
   if(!res.ok){
-    new Alert('Error', errorCodes[res.err], 5000);
+    new Alert('Error', errorCodes[res.err] || res.err, 5000);
     return;
   }
 
@@ -352,7 +352,7 @@ nextButton.onclick = async () => {
   loader.style.display = 'none';
 
   if(!res.ok){
-    new Alert('Error', errorCodes[res.err], 5000);
+    new Alert('Error', errorCodes[res.err] || res.err, 5000);
     return;
   }
 
@@ -392,7 +392,7 @@ prevButton.onclick = async () => {
   loader.style.display = 'none';
 
   if(!res.ok){
-    new Alert('Error', errorCodes[res.err], 5000);
+    new Alert('Error', errorCodes[res.err] || res.err, 5000);
     return;
   }
 
@@ -499,7 +499,7 @@ let slideEditor = ( slide: Slide ) => {
     let res = await req.json();
 
     if(!res.ok)
-      return new Alert('Error', errorCodes[res.err], 5000);
+      return new Alert('Error', errorCodes[res.err] || res.err, 5000);
 
     // Update the local slide values
     slide.url = newUrl;
@@ -717,8 +717,25 @@ let displayAppOpt = ( index: number ) => {
       creatorOptionStringMenu.style.display = 'block';
       creatorOptionStringTitle.innerHTML = title;
 
-      creatorOptionString.clicked = () => {
+      creatorOptionString.clicked = async () => {
         creatorOptionStringMenu.style.display = 'none';
+
+        console.log(creatorAppSlide);
+        let req = await fetch('/api/v1/apps/option?slideId=' + creatorAppSlide.id, {
+          method: 'PUT',
+          body: JSON.stringify({
+            key: opt,
+            value: creatorOptionString.input.value
+          }),
+          headers: {
+            'content-type': 'application/json',
+            token: localStorage.getItem('token')!
+          }
+        });
+        let res = await req.json();
+
+        if(!res.ok)
+          return new Alert("Error", errorCodes[res.err] || res.err, 5000);
 
         if(options[index + 1])
           displayAppOpt(index + 1);
@@ -790,6 +807,7 @@ creatorCreate.onclick = async () => {
   let time = parseInt(creatorTimeInput.value) * 1000;
   let type = creatorType;
   let appId = creatorAppSlide.id;
+  console.log(creatorAppSlide);
 
   if(type == undefined)
     return new Alert('Error', 'Cannot create a slide without a type, Please press cancel and try again', 5000);
@@ -800,7 +818,7 @@ creatorCreate.onclick = async () => {
   let res = await req.json();
 
   if(!res.ok)
-    return new Alert('Error', errorCodes[res.err], 5000);
+    return new Alert('Error', errorCodes[res.err] || res.err, 5000);
 
   let s = new Slide();
   slides.push(s);

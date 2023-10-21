@@ -33,18 +33,30 @@ let loadApps = () => {
     // For every folder, create a new app instance (../classes/app.js)
     let app = new Application(itrfc);
 
+    let registerAppEvents = () => {
+      app.on('load-html', ( htmlPath ) => {
+        emitter.emit('load-html', htmlPath);
+      })
+
+      app.on('load-url', ( urlPath ) => {
+        emitter.emit('load-url', urlPath);
+      })
+    }
+
     // Hook load event and hook the err event, but only once
     app.on('load', () => {
       apps.push(app);
       console.log('Loaded App: '+app.name)
 
       app.removeAllListeners();
+      registerAppEvents();
     })
 
     app.on('err', ( err ) => {
       console.error('Failed to load: '+app.name, err);
 
       app.removeAllListeners();
+      registerAppEvents();
     })
 
     // Tell the app class to load a specific folder
