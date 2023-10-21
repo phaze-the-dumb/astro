@@ -117,7 +117,7 @@ fastify.put('/api/v1/slides', ( req, reply ) => {
   // Creates a new slide
 
   if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
-  if(!req.body || !req.body.time || !req.body.type || !req.body.time)return reply.send({ ok: false, err: 'BODY_INVALID' });
+  if(!req.body || !req.body.time || req.body.type == undefined || !req.body.time)return reply.send({ ok: false, err: 'BODY_INVALID' });
 
   if(req.body.type == 0 && !req.body.appId)return reply.send({ ok: false, err: 'APPID_INVALID' });
   else if(req.body.type == 1 && !req.body.url)return reply.send({ ok: false, err: 'URL_INVALID' });
@@ -189,6 +189,17 @@ fastify.get('/api/v1/stop', ( req, reply ) => {
   reply.send({ ok: true });
 })
 
+fastify.put('/api/v1/apps/option', ( req, reply ) => {
+  // Updates options for an app
+  if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
+
+  let app = appSlides.find(x => x.id == req.query.slideId);
+  if(!app)return reply.send({ ok: false, err: 'ID_INVALID' });
+
+  app.emit('options', req.body.key, req.body.value);
+  reply.send({ ok: true });
+})
+
 fastify.get('/api/v1/settings', ( req, reply ) => {
   // Returns the current settings
 
@@ -255,4 +266,4 @@ let config = ( c ) => {
   apps.loadApps();
 };
 
-module.exports = { getEmitter: () => emitter, config, getActive: () => isStarted };
+module.exports = { getEmitter: () => emitter, config, getActive: () => isStarted, getAppSlides: () => appSlides };

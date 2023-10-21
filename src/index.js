@@ -7,6 +7,20 @@ const { Config } = require('./classes/config');
 const server = require('./backend/server');
 const adblockRust = require('adblock-rs');
 
+// Debugging
+const unhandled = require('electron-unhandled');
+const { openNewGitHubIssue, debugInfo } = require('electron-util');
+
+unhandled({
+	reportButton: error => {
+		openNewGitHubIssue({
+			user: 'phaze-the-dumb',
+			repo: 'astro',
+			body: `\`\`\`\n${error.stack}\n\`\`\`\n\n---\n\n${debugInfo()}`
+		});
+	}
+});
+
 // Usually this would be a very bad idea, but this app is needed to be able to open websites with self signed certs.
 app.commandLine.appendSwitch('ignore-certificate-errors');
 
@@ -103,6 +117,14 @@ app.on('ready', () => {
     mainWindow.webContents.send('slides-update', type, slide);
   })
 
+  server.getEmitter().on('load-url', ( urlPath ) => {
+    mainWindow.loadURL(urlPath);
+  })
+
+  server.getEmitter().on('load-html', ( filePath ) => {
+    mainWindow.loadFile(filePath);
+  })
+
   // Hook the start event, and start the slideshow
   server.getEmitter().on('start', () => {
     mainWindow.webContents.send('unload');
@@ -168,6 +190,12 @@ let displaySlide = ( win ) => {
 
   // Check what type of slide it is, if it's a website, load the website
   switch(currentSlide.type) {
+    case 0:
+      console.log(server.getAppSlides());
+      let app = server.getAppSlides().find(x => x.id === currentSlide.appId);
+      app.emit('load');
+
+      break;
     case 1:
       currentUrl = currentSlide.url;
       win.loadURL(currentSlide.url);

@@ -14,6 +14,11 @@ class Slide extends EventEmitter{
     this.id = randomUUID();
   }
 
+  setID(id){
+    this.id = id;
+    return this;
+  }
+
   addStringOption(name){
     // Create a string setting
     this.opts[name] = { type: 'String', value: null };
@@ -26,6 +31,14 @@ class Slide extends EventEmitter{
     this.parentEmitter.emit('registerSlide', this);
 
     return this;
+  }
+
+  loadHTML(file){
+    this.parentEmitter.emit('load-html', file);
+  }
+
+  loadURL(url){
+    this.parentEmitter.emit('load-url', url);
   }
 }
 

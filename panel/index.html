@@ -1,3 +1,5 @@
+<!-- This holds the code for the web panel -->
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -67,7 +69,7 @@
           <div class="creator-choose-url" style="margin: 50px;">
             <p id="creator-choose-url-error"></p>
 
-            <input type="text" id="creator-slide-url-input" autocomplete="off">
+            <input type="text" id="creator-slide-url-input" placeholder="Enter Slide URL..." autocomplete="off">
             <div class="button" id="creator-slide-url">Submit</div><br /><br />
 
             <div class="button" id="creator-choose-url-back">Back</div>
@@ -82,6 +84,16 @@
 
             <div class="button" id="creator-create">Submit</div>
             <div class="button" id="creator-choose-time-back">Back</div>
+            <div class="button creator-cancel">Cancel</div>
+          </div>
+
+          <div class="creator-option-string">
+            <p id="creator-option-string-title"></p>
+
+            <input type="text" id="creator-option-string-input" autocomplete="off">
+            <div class="button" id="creator-option-string">Submit</div><br /><br />
+
+            <div class="button" id="creator-option-string-back">Back</div>
             <div class="button creator-cancel">Cancel</div>
           </div>
         </div>
@@ -122,7 +134,7 @@
           <input type="checkbox" id="setting-autostart">
           <span class="slider round"></span>
         </label>
-      </div>
+      </div><br />
 
       <div class="setting-toggle">
         <span>Show panel address in corner </span>
@@ -130,7 +142,7 @@
           <input type="checkbox" id="setting-showaddr">
           <span class="slider round"></span>
         </label>
-      </div><br />
+      </div><br /><br />
 
       <div class="button" id="settings-close">Close</div>
     </div>
