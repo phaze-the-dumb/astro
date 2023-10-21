@@ -3,9 +3,24 @@ const { app, BrowserWindow, ipcMain, nativeImage, session } = require('electron'
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const path = require('path');
 const { Config } = require('./classes/config');
 const server = require('./backend/server');
 const adblockRust = require('adblock-rs');
+
+// Debugging
+const unhandled = require('electron-unhandled');
+const { openNewGitHubIssue, debugInfo } = require('electron-util');
+
+unhandled({
+	reportButton: error => {
+		openNewGitHubIssue({
+			user: 'phaze-the-dumb',
+			repo: 'astro',
+			body: `\`\`\`\n${error.stack}\n\`\`\`\n\n---\n\n${debugInfo()}`
+		});
+	}
+});
 
 // Usually this would be a very bad idea, but this app is needed to be able to open websites with self signed certs.
 app.commandLine.appendSwitch('ignore-certificate-errors');

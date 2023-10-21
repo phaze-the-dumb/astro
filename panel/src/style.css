@@ -254,7 +254,7 @@ input[type="text"]:focus{
   opacity: 0;
 }
 
-.creator-choose-type, .creator-choose-app, .creator-choose-url, .creator-choose-time{
+.creator-choose-type, .creator-choose-app, .creator-choose-url, .creator-choose-time, .creator-option-string{
   display: none;
 }
 
@@ -300,7 +300,6 @@ input[type="text"]:focus{
   border-radius: 10px;
   box-shadow: #0005 0 0 10px;
   width: 275px;
-  height: 150px;
   text-align: center;
   display: none;
   opacity: 0;

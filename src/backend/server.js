@@ -117,7 +117,7 @@ fastify.put('/api/v1/slides', ( req, reply ) => {
   // Creates a new slide
 
   if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
-  if(!req.body || !req.body.time || !req.body.type || !req.body.time)return reply.send({ ok: false, err: 'BODY_INVALID' });
+  if(!req.body || !req.body.time || req.body.type == undefined || !req.body.time)return reply.send({ ok: false, err: 'BODY_INVALID' });
 
   if(req.body.type == 0 && !req.body.appId)return reply.send({ ok: false, err: 'APPID_INVALID' });
   else if(req.body.type == 1 && !req.body.url)return reply.send({ ok: false, err: 'URL_INVALID' });
