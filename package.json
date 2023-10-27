@@ -41,7 +41,9 @@
         "ui/panel/*",
         "ui/assets/*",
         "ui/panel/assets/*",
-        "build/*"
+        "build/*",
+        "src/data/fake-uBO-files/*",
+        "src/data/fake-uBO-files/**/*"
       ]
     }
   }
