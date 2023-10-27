@@ -53,11 +53,21 @@ let uboUnbreakFilters = fs.readFileSync(__dirname + '/data/unbreak.txt', { encod
 filterSet.addFilters(uboUnbreakFilters);
 
 // Load the uBlock Origin files
-const resources = adblockRust.uBlockResources(
-  __dirname + '/data/fake-uBO-files/web_accessible_resources',
-  __dirname + '/data/fake-uBO-files/redirect-resources.js',
-  __dirname + '/data/fake-uBO-files/scriptlets.js'
-);
+let resources;
+
+if(process.env.APP_DEV ? (process.env.APP_DEV.trim() == "true") : false){
+  resources = adblockRust.uBlockResources(
+    __dirname + '/data/fake-uBO-files/web_accessible_resources',
+    __dirname + '/data/fake-uBO-files/redirect-resources.js',
+    __dirname + '/data/fake-uBO-files/scriptlets.js'
+  );
+} else{
+  resources = adblockRust.uBlockResources(
+    path.join(__dirname, '../../src/data/fake-uBO-files/web_accessible_resources'),
+    path.join(__dirname, '../../src/data/fake-uBO-files/redirect-resources.js'),
+    path.join(__dirname, '../../src/data/fake-uBO-files/scriptlets.js')
+  );
+}
 
 // Create an adblocking engine
 const engine = new adblockRust.Engine(filterSet, false);
