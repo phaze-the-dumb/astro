@@ -31,9 +31,13 @@
   "build": {
     "appId": "xyz.phazed.astro",
     "productName": "Astro",
-    "copyright": "Made with ❤️ by _phaz",
+    "copyright": "By _phaz",
     "win": {
       "target": "dir",
+      "extraResources": [
+        "src/data/fake-uBO-files/*",
+        "src/data/fake-uBO-files/**/*"
+      ],
       "files": [
         "src/*",
         "src/**/*",
@@ -41,9 +45,7 @@
         "ui/panel/*",
         "ui/assets/*",
         "ui/panel/assets/*",
-        "build/*",
-        "src/data/fake-uBO-files/*",
-        "src/data/fake-uBO-files/**/*"
+        "build/*"
       ]
     }
   }
