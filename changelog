@@ -1,5 +1,4 @@
-**Please do not attempt to add an application slide as it *will* break things**
-
+0.1.1:
 - Can now edit slides while slides are running
 - Alerts now show in slide
 - Fixed some animations on the web panel

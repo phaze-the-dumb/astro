@@ -116,3 +116,7 @@ ipcRenderer.on('slides-update', ( _event, type, slide ) => {
 
   new Alert(title, body, 5000);
 });
+
+ipcRenderer.on('query-selector', ( _event, selector ) => {
+  ipcRenderer.send('query-selector', document.querySelectorAll(selector));
+})

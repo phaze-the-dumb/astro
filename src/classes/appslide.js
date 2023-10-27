@@ -4,7 +4,7 @@ const { randomUUID } = require('crypto');
 const { EventEmitter } = require('events');
 
 class Slide extends EventEmitter{
-  constructor(name, loaderEmitter){
+  constructor(name, loaderEmitter, app){
     super();
 
     // Update class information to match slide
@@ -12,6 +12,7 @@ class Slide extends EventEmitter{
     this.parentEmitter = loaderEmitter;
     this.opts = {};
     this.id = randomUUID();
+    this.app = app;
   }
 
   setID(id){
@@ -34,11 +35,29 @@ class Slide extends EventEmitter{
   }
 
   loadHTML(file){
-    this.parentEmitter.emit('load-html', file);
+    return new Promise((res, rej) => {
+      this.parentEmitter.once('slide-loaded', ( ok ) => {
+        if(ok)
+          res(this.app.pageInterface);
+        else
+          rej();
+      })
+
+      this.parentEmitter.emit('load-html', file);
+    })
   }
 
   loadURL(url){
-    this.parentEmitter.emit('load-url', url);
+    return new Promise((res, rej) => {
+      this.parentEmitter.once('slide-loaded', ( ok ) => {
+        if(ok)
+          res(this.app.pageInterface);
+        else
+          rej();
+      })
+
+      this.parentEmitter.emit('load-url', url);
+    })
   }
 }
 

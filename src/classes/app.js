@@ -3,11 +3,27 @@
 const { EventEmitter } = require('events');
 const fs = require('fs');
 const path = require('path');
+const { Slide } = require('../classes/appslide');
 
 class Application extends EventEmitter{
-  constructor( itrfc ){
+  constructor(loaderEmitter){
     super();
-    this.interface = itrfc;
+
+    // Create an interface for the applications to hook into
+    this.interface = {
+      registerSlide: ( name ) => {
+        // When the application wants to create a new slide template, create a new appslide class (../classes/appslide.js)
+        let slide = new Slide(name, loaderEmitter, this);
+
+        return slide;
+      }
+    }
+
+    this.pageInterface = {
+      querySelector: ( selector ) => {
+        
+      }
+    }
   }
 
   load( p ){
