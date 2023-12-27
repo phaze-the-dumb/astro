@@ -28,7 +28,7 @@ class Config {
     let json = {
       slides: this.slides.map(s => {
         if(s.type == 0)
-          return { time: s.time, type: s.type, appId: s.appId, appOpts: s.appOpts };
+          return { time: s.time, type: s.type, appId: s.appId, appOpts: s.appOpts, slideName: s.slideName };
         else if(s.type == 1)
           return { time: s.time, type: s.type, url: s.url };
       }),
@@ -58,7 +58,7 @@ class Config {
     let s = this.slides.find(x => x.id === id);
 
     s.time = slide.time;
-    s.appId = slide.appId;
+    s.slideName = slide.slideName;
     s.type = slide.type;
     s.url = slide.url;
 

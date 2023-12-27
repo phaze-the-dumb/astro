@@ -5,6 +5,7 @@ class Slide{
   appId?: string;
   appOpts: any = {};
   id: string = "";
+  slideName: string = "";
 }
 
 export { Slide };

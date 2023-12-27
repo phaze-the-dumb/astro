@@ -142,6 +142,7 @@ fastify.put('/api/v1/slides', ( req, reply ) => {
   if(!req.body || !req.body.time || req.body.type == undefined || !req.body.time)return reply.send({ ok: false, err: 'BODY_INVALID' });
 
   if(req.body.type == 0 && !req.body.appId)return reply.send({ ok: false, err: 'APPID_INVALID' });
+  if(req.body.type == 0 && !req.body.name)return reply.send({ ok: false, err: 'NAME_INVALID' });
   else if(req.body.type == 1 && !req.body.url)return reply.send({ ok: false, err: 'URL_INVALID' });
 
   if(req.body.type === 0){
@@ -161,7 +162,8 @@ fastify.put('/api/v1/slides', ( req, reply ) => {
       appId: req.body.appId,
       appOpts: req.body.appOpts,
       url: req.body.url,
-      loadedSlideID: slideID
+      loadedSlideID: slideID,
+      slideName: req.body.name
     });
 
     emitter.emit('slides-update', 0, slideInfo);
@@ -190,10 +192,10 @@ fastify.put('/api/v1/slides/:id', ( req, reply ) => {
   if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
   if(!req.params.id)return reply.send({ ok: false, err: 'ID_INVALID' });
 
-  if(!req.body || !req.body.time || !req.body.type || !req.body.time)return reply.send({ ok: false, err: 'BODY_INVALID' });
+  console.log(req.body)
+  if(!req.body || !req.body.time || req.body.type === undefined)return reply.send({ ok: false, err: 'BODY_INVALID' });
 
-  if(req.body.type == 0 && !req.body.appId)return reply.send({ ok: false, err: 'APPID_INVALID' });
-  else if(req.body.type == 1 && !req.body.url)return reply.send({ ok: false, err: 'URL_INVALID' });
+  if(req.body.type == 1 && !req.body.url)return reply.send({ ok: false, err: 'URL_INVALID' });
 
   emitter.emit('slides-update', 2, configData.slides.find(x => x.id === req.params.id));
 
