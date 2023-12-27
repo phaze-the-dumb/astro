@@ -33,12 +33,13 @@ if(!fs.existsSync(path.join(os.homedir(), './AppData/Roaming/PhazeDev/.config/as
 
 // Load the config into the config class (./classes/config.js)
 let config = new Config(path.join(os.homedir(), './AppData/Roaming/PhazeDev/.config/astro.json'));
-server.config(config);
 
 // Init empty values
 let slideTimeout = null;
 let currentSlideIndex = 0;
 let currentUrl = 'http://localhost';
+let onSlideLoaded = () => {};
+let onSlideLoadFail = () => {};
 
 // Create a new adblocking filter
 const filterSet = new adblockRust.FilterSet(false);
@@ -96,21 +97,18 @@ app.on('ready', () => {
   // Hide the windows menu bar
   mainWindow.setMenuBarVisibility(false);
 
-  // If autostart is enabled and we have slides, start the slideshow
-  if(config.autoStart && config.slides.length > 0){
-    displaySlide(mainWindow);
-  } else{
-    // If not load the landing page
-
-    if(isDev = process.env.APP_DEV ? (process.env.APP_DEV.trim() == "true") : false)
-      mainWindow.loadURL('http://localhost:5173/');
-    else
-      mainWindow.loadFile(path.join(__dirname, '../ui/index.html'));
-  }
-
   // Load the applications icon
   let icon = nativeImage.createFromPath(path.join(__dirname, '../build/icon.ico'));
   mainWindow.setIcon(icon);
+
+  // Hook slide load and slide load fail events
+  mainWindow.webContents.on('did-finish-load', () => {
+    onSlideLoaded();
+  })
+
+  mainWindow.webContents.on('did-fail-load', () => {
+    onSlideLoadFail();
+  })
 
   // Hook the link code event, and relay it to the window contents
   server.getEmitter().on('link-code', ( code ) => {
@@ -125,13 +123,56 @@ app.on('ready', () => {
   // Hook the slides update event, and relay it to the window contents
   server.getEmitter().on('slides-update', ( type, slide ) => {
     mainWindow.webContents.send('slides-update', type, slide);
+  })  
+  
+  // Relay the query selector event back to the application
+  ipcMain.on('query-selector', ( _ev, el, selector  ) => {
+    server.getEmitter().emit('query-selector', el, selector)
+  })
+
+  // Hook the query selector event, and relay it to the window contents
+  server.getEmitter().on('query-selector', ( selector ) => {
+    mainWindow.webContents.send('query-selector', selector);
+  }) 
+  
+  // Hook the selector command event, and relay it to the window contents
+  server.getEmitter().on('selector-command', ( selector, command, value ) => {
+    mainWindow.webContents.send('selector-command', selector, command, value);
   })
 
   server.getEmitter().on('load-url', ( urlPath ) => {
+    onSlideLoaded = () => {
+      server.getEmitter().emit('slide-loaded', true);
+
+      onSlideLoaded = () => {};
+      onSlideLoadFail = () => {};
+    }
+
+    onSlideLoadFail = () => {
+      server.getEmitter().emit('slide-loaded', false);
+
+      onSlideLoaded = () => {};
+      onSlideLoadFail = () => {};
+    }
+
     mainWindow.loadURL(urlPath);
   })
 
   server.getEmitter().on('load-html', ( filePath ) => {
+    onSlideLoaded = () => {
+      server.getEmitter().emit('slide-loaded', true);
+
+      onSlideLoaded = () => {};
+      onSlideLoadFail = () => {};
+    }
+
+    onSlideLoadFail = () => {
+      server.getEmitter().emit('slide-loaded', false);
+
+      onSlideLoaded = () => {};
+      onSlideLoadFail = () => {};
+    }
+
     mainWindow.loadFile(filePath);
   })
 
@@ -191,6 +232,21 @@ app.on('ready', () => {
   ipcMain.on('getConfig', () => {
     mainWindow.webContents.send('getConfig', config);
   });
+
+  // After hooking everything, start the server
+  server.config(config);
+
+  // If autostart is enabled and we have slides, start the slideshow
+  if(config.autoStart && config.slides.length > 0){
+    displaySlide(mainWindow);
+  } else{
+    // If not load the landing page
+
+    if(isDev = process.env.APP_DEV ? (process.env.APP_DEV.trim() == "true") : false)
+      mainWindow.loadURL('http://localhost:5173/');
+    else
+      mainWindow.loadFile(path.join(__dirname, '../ui/index.html'));
+  }
 });
 
 let displaySlide = ( win ) => {
@@ -201,9 +257,16 @@ let displaySlide = ( win ) => {
   // Check what type of slide it is, if it's a website, load the website
   switch(currentSlide.type) {
     case 0:
-      console.log(server.getAppSlides());
       let app = server.getAppSlides().find(x => x.id === currentSlide.appId);
-      app.emit('load');
+      if(!app){
+        if(isDev = process.env.APP_DEV ? (process.env.APP_DEV.trim() == "true") : false)
+          win.loadURL('http://localhost:5173/');
+        else
+          win.loadFile(path.join(__dirname, '../ui/index.html'));
+      } else{
+        let loadedSlide = server.getLoadedSlides().find(x => x.id === currentSlide.loadedSlideID);
+        loadedSlide.instance.load();
+      }
 
       break;
     case 1:

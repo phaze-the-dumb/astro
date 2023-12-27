@@ -116,3 +116,39 @@ ipcRenderer.on('slides-update', ( _event, type, slide ) => {
 
   new Alert(title, body, 5000);
 });
+
+let selToJson = ( sel ) => {
+  let objs = document.querySelectorAll(sel);
+  let data = [];
+
+  objs.forEach(obj => {
+    if(obj.id === '')
+      obj.id = 'sel-' + Math.random().toString().replace('0.', '');
+
+    data.push({
+      id: obj.id,
+      class: obj.className,
+      innerHTML: obj.innerHTML
+    })
+  })
+
+  return JSON.stringify(data);
+}
+
+ipcRenderer.on('query-selector', ( _event, selector ) => {
+  ipcRenderer.send('query-selector', selToJson(selector),  selector);
+})
+
+ipcRenderer.on('selector-command', ( _event, selector, command, value ) => {
+  switch(command){
+    case 'set-class':
+      document.querySelector(selector).className = value;
+      break;
+    case 'set-innerhtml':
+      document.querySelector(selector).innerHTML = value;
+      break;
+    case 'set-property':
+      document.querySelector(selector).setProperty(value.split(',|,|,')[0], value.split(',|,|,')[1]);
+      break;
+  }
+})
