@@ -76,8 +76,6 @@ class Config {
   async setPasscode( plaintext ){
     let hash = await argon2.hash(plaintext);
     this.passcode = hash;
-
-    console.log(this)
   }
 
   async checkCode( plaintext ){

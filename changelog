@@ -14,3 +14,8 @@
 - Added error reporting
 - Apps now load, but do not run
 - You *can* technically add / remove apps on the web panel, but they do not do anything, and you cannot edit them
+
+0.1.2:
+- Added password locking
+- Apps now load and should run
+- App slides now render and are mostly manageable on the web panel

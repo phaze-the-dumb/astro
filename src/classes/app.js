@@ -61,7 +61,6 @@ class Application extends EventEmitter{
           }, 5000);
   
           let cb = ( element, query ) => {
-            console.log(query, selector)
             if(query === selector){
               loaderEmitter.removeListener('query-selector', cb);
               clearTimeout(timeout);

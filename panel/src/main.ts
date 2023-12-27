@@ -250,11 +250,11 @@ let main = async () => {
         playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
       else
         playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '')
-    } else if(currentSlide.type == 0 && currentSlide.appId){
-      if(currentSlide.appId.length > 20)
-        playerInfo.innerHTML = currentSlide.appId.slice(0, 20) + '...'
+    } else if(currentSlide.type == 0 && currentSlide){
+      if(currentSlide.slideName.length > 20)
+        playerInfo.innerHTML = currentSlide.slideName.slice(0, 20) + '...'
       else
-        playerInfo.innerHTML = currentSlide.appId
+        playerInfo.innerHTML = currentSlide.slideName
     }
 
     playerActive = true;
@@ -295,11 +295,11 @@ let main = async () => {
           playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
         else
           playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '')
-      } else if(currentSlide.type == 0 && currentSlide.appId){
-        if(currentSlide.appId.length > 20)
-          playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
+      } else if(currentSlide.type == 0){
+        if(currentSlide.slideName.length > 20)
+          playerInfo.innerHTML = currentSlide.slideName.slice(0, 20) + '...'
         else
-          playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '')
+          playerInfo.innerHTML = currentSlide.slideName
       }
     }
   }, 1000);
@@ -389,9 +389,9 @@ nextButton.onclick = async () => {
       playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '')
   } else if(currentSlide.type == 0 && currentSlide.appId){
     if(currentSlide.appId.length > 20)
-      playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
+      playerInfo.innerHTML = currentSlide.slideName.slice(0, 20) + '...'
     else
-      playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '')
+      playerInfo.innerHTML = currentSlide.slideName
   }
 
   let infoReq = await fetch('/api/v1', { headers: { token: localStorage.getItem('token')! }});
@@ -429,9 +429,9 @@ prevButton.onclick = async () => {
       playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '')
   } else if(currentSlide.type == 0 && currentSlide.appId){
     if(currentSlide.appId.length > 20)
-      playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
+      playerInfo.innerHTML = currentSlide.slideName.slice(0, 20) + '...'
     else
-      playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '')
+      playerInfo.innerHTML = currentSlide.slideName
   }
 
   let infoReq = await fetch('/api/v1', { headers: { token: localStorage.getItem('token')! }});

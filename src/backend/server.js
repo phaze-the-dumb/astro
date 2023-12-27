@@ -192,9 +192,7 @@ fastify.put('/api/v1/slides/:id', ( req, reply ) => {
   if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
   if(!req.params.id)return reply.send({ ok: false, err: 'ID_INVALID' });
 
-  console.log(req.body)
   if(!req.body || !req.body.time || req.body.type === undefined)return reply.send({ ok: false, err: 'BODY_INVALID' });
-
   if(req.body.type == 1 && !req.body.url)return reply.send({ ok: false, err: 'URL_INVALID' });
 
   emitter.emit('slides-update', 2, configData.slides.find(x => x.id === req.params.id));
