@@ -90,23 +90,24 @@ window.onload = () => {
         getCodeButton.style.display = 'block';
         linkCode.input.setAttribute('type', 'text');
       }
-    })
 
-  // Check if has a valid token
-  if(!localStorage.getItem('token'))return;
-
-  // Check if token is valid
-  fetch('/api/v1', {
-    headers: {
-      token: localStorage.getItem('token')!
-    }
-  })
-    .then(data => data.json())
-    .then(data => {
-      if(data.ok){
-        getCodeButton.style.display = 'none';
-        main();
-      }
+      // Check if has a valid token
+      if(!localStorage.getItem('token'))return; 
+      
+      // Check if token is valid
+      fetch('/api/v1', {
+        headers: {
+          token: localStorage.getItem('token')!
+        }
+      })
+        .then(data => data.json())
+        .then(data => {
+          if(data.ok){
+            getCodeButton.style.display = 'none';
+            codeInput.style.display = 'none';
+            main();
+          }
+        })
     })
 }
 
@@ -173,6 +174,7 @@ let main = async () => {
   slides = (await slidesReq.json()).slides;
 
   console.log(slides);
+  codeInput.style.display = 'none';
 
   for(let s of slides){
     // Render each slide
@@ -595,7 +597,7 @@ slideDeleteButton.onclick = () => {
     }
   })
     .then(data => data.json())
-    .then(data => {
+    .then(async data => {
       if(!data.ok)
         return new Alert('Error', errorCodes[data.err], 5000);
 
@@ -615,6 +617,27 @@ slideDeleteButton.onclick = () => {
       slidesContainer.style.width = '300px';
     
       currentSlideId = null;
+
+      if(slides.length == 0){
+        // Tell the backend to stop the slideshow
+        let req = await fetch('/api/v1/stop', { headers: { token: localStorage.getItem('token')! }});
+        let res = await req.json();
+
+        if(res.err === 'STOPPED')return;
+
+        if(!res.ok)
+          return new Alert('Error', errorCodes[res.err] || res.err, 5000);
+
+        currentSlide = null;
+
+        // Hide the player
+        playerActive = false;
+        startButton.style.display = 'inline-block';
+        stopButton.style.display = 'none';
+        player.style.display = 'none';
+        slidesContainer.style.display = 'inline-block';
+        console.log(playerActive)
+      }
 
       // Animate the slide list back in
       setTimeout(() => {
@@ -694,6 +717,8 @@ let applicationPicked = async ( id: string ) => {
   creatorAppSlide = options;
   creatorChooseApp.style.display = 'none';
 
+  creatorAppSlide.appOpts = {};
+
   if(Object.keys(options)[0])
     displayAppOpt(0);
   else {
@@ -713,20 +738,11 @@ let displayAppOpt = ( index: number ) => {
   if(!creatorAppSlide)
     return new Alert('Invaild', 'Cannot display options of an app that doesn\'t exist.', 5000);
 
-  // Find the option
-  let options = Object.keys(creatorAppSlide.options);
-  let opt = options[index];
-
-  // Check the option exists
-  if(!opt)
-    return new Alert('Invaild', 'Cannot display an option of an app that doesn\'t exist.', 5000);
-
   // Get the option info
-  let info = creatorAppSlide.options[opt];
+  let info = creatorAppSlide.options[index];
 
   // Get the option name
-  let title = opt;
-  title = title[0].toUpperCase() + title.substring(1); // Capitalize the title
+  let title = info.name;
 
   //Check the type
   console.log(title, info);
@@ -737,25 +753,9 @@ let displayAppOpt = ( index: number ) => {
 
       creatorOptionString.clicked = async () => {
         creatorOptionStringMenu.style.display = 'none';
+        creatorAppSlide.appOpts[info.key] = creatorOptionString.input.value;
 
-        console.log(creatorAppSlide);
-        let req = await fetch('/api/v1/apps/option?slideId=' + creatorAppSlide.id, {
-          method: 'PUT',
-          body: JSON.stringify({
-            key: opt,
-            value: creatorOptionString.input.value
-          }),
-          headers: {
-            'content-type': 'application/json',
-            token: localStorage.getItem('token')!
-          }
-        });
-        let res = await req.json();
-
-        if(!res.ok)
-          return new Alert("Error", errorCodes[res.err] || res.err, 5000);
-
-        if(options[index + 1])
+        if(creatorAppSlide.options[index + 1])
           displayAppOpt(index + 1);
         else {
           creatorChooseTime.style.display = 'block';
@@ -821,16 +821,23 @@ creatorChooseTimeBackBtn.onclick = () => {
 }
 
 creatorCreate.onclick = async () => {
+  console.log(creatorAppSlide);
   let url = creatorSlideUrl.input.value;
   let time = parseInt(creatorTimeInput.value) * 1000;
   let type = creatorType;
-  let appId = creatorAppSlide.id;
-  console.log(creatorAppSlide);
+  let appId = undefined;
 
   if(type == undefined)
     return new Alert('Error', 'Cannot create a slide without a type, Please press cancel and try again', 5000);
 
-  let payload = { type, url, time, appId };
+  let appOpts = undefined;
+
+  if(creatorAppSlide && type === 0){
+    appOpts = creatorAppSlide.appOpts;
+    appId = creatorAppSlide.id;
+  }
+
+  let payload = { type, url, time, appId, appOpts };
 
   let req = await fetch('/api/v1/slides', { method: 'PUT', body: JSON.stringify(payload), headers: { 'Content-Type': 'application/json', token: localStorage.getItem('token')! } });
   let res = await req.json();
@@ -848,6 +855,9 @@ creatorCreate.onclick = async () => {
   s.url = url;
   s.appId = appId;
   s.id = res.slide.id;
+
+  if(creatorAppSlide)
+    s.appOpts = creatorAppSlide.appOpts;
 
   if(s.type == 1 && s.url){
     let slide = document.createElement('div');

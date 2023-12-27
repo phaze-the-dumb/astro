@@ -3,6 +3,7 @@ class Slide{
   type: number = 0;
   url?: string;
   appId?: string;
+  appOpts: any = {};
   id: string = "";
 }
 

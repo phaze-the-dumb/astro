@@ -28,7 +28,7 @@ class Config {
     let json = {
       slides: this.slides.map(s => {
         if(s.type == 0)
-          return { time: s.time, type: s.type, appId: s.appId };
+          return { time: s.time, type: s.type, appId: s.appId, appOpts: s.appOpts };
         else if(s.type == 1)
           return { time: s.time, type: s.type, url: s.url };
       }),
@@ -61,6 +61,14 @@ class Config {
     s.appId = slide.appId;
     s.type = slide.type;
     s.url = slide.url;
+
+    this.save();
+  }
+
+  setOptions( id, options ){
+    // Update slide options and save it to the file
+    let s = this.slides.find(x => x.id === id);
+    s.appOpts = options;
 
     this.save();
   }
