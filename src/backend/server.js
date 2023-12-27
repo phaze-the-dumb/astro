@@ -329,6 +329,8 @@ let config = ( c ) => {
   apps.loadApps();
 
   configData.slides.forEach((slide, i) => {
+    if(slide.type !== 0)return;
+    
     let slideTemp = availableSlides.find(x => x.id === slide.appId);
     let slideInstance = slideTemp.app.createSlide(slideTemp.class, slide.appOpts);
 
