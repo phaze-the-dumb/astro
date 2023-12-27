@@ -76,6 +76,22 @@ let creatorAppSlide: any = null;
 
 // Hook window load event
 window.onload = () => {
+  // Get authentication type
+  fetch('/api/v1/auth/type')
+    .then(data => data.json())
+    .then(data => {
+      console.log(data);
+      if(data.type == 0){
+        loader.style.display = 'none';
+        codeInput.style.display = 'block';
+        getCodeButton.style.display = 'none';
+        linkCode.input.setAttribute('type', 'password');
+      } else if(data.type == 1){
+        getCodeButton.style.display = 'block';
+        linkCode.input.setAttribute('type', 'text');
+      }
+    })
+
   // Check if has a valid token
   if(!localStorage.getItem('token'))return;
 
@@ -95,7 +111,7 @@ window.onload = () => {
 }
 
 getCodeButton.onclick = () => {
-  // When get code button is pressed, fetch the backend and show the code
+  // When get code button is pressed, fetch the backend and show the code input
   loader.style.display = 'block';
 
   fetch('/api/v1/auth/link')
@@ -137,10 +153,12 @@ linkCode.clicked = () => {
 
         main()
       } else{
+        loader.style.display = 'none';
         new Alert('Error', errorCodes[data.err], 5000);
       }
     })
     .catch(e => {
+      loader.style.display = 'none';
       new Alert('Error', e, 5000);
     })
 }

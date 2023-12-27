@@ -44,7 +44,17 @@ fastify.get('/assets/:file', ( req, reply ) => {
   reply.send(fs.readFileSync(path.join(__dirname, '../../ui/panel/assets/'+req.params.file), 'utf8'));
 })
 
+fastify.get('/api/v1/auth/type', ( req, reply ) => {
+  if(configData.passcode)
+    reply.send({ ok: true, type: 0 });
+  else
+    reply.send({ ok: true, type: 1 });
+})
+
 fastify.get('/api/v1/auth/link', ( req, reply ) => {
+  if(configData.passcode)
+    return reply.send({ ok: false, err: 'USE_PASSCODE' });
+
   if(isStarted){
     // If we are already playing slides, stop the slideshow and open the link code
     emitter.emit('stop');
@@ -67,11 +77,16 @@ fastify.get('/api/v1/auth/link', ( req, reply ) => {
   }
 })
 
-fastify.post('/api/v1/auth', ( req, reply ) => {
+fastify.post('/api/v1/auth', async ( req, reply ) => {
   if(isStarted)return reply.send({ ok: false, err: 'STARTED' });
 
-  if(code == null)return reply.send({ ok: false, err: 'CODE_INVALID' });
-  if(req.body.code !== code)return reply.send({ ok: false, err: 'CODE_INVALID' });
+  if(configData.passcode){
+    if(req.body.code == null || typeof req.body.code !== 'string')return reply.send({ ok: false, err: 'CODE_INVALID' });
+    if(!await configData.checkCode(req.body.code))return reply.send({ ok: false, err: 'CODE_INVALID' });
+  } else{
+    if(code == null)return reply.send({ ok: false, err: 'CODE_INVALID' });
+    if(req.body.code !== code)return reply.send({ ok: false, err: 'CODE_INVALID' });
+  }
 
   // Generate a token and send it to the client
   let token = crypto.randomBytes(32).toString('hex');
@@ -205,6 +220,18 @@ fastify.get('/api/v1/settings', ( req, reply ) => {
 
   if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
   reply.send({ ok: true, autoStart: configData.autoStart, showAddr: configData.showAddr });
+})
+
+fastify.put('/api/v1/settings/passcode', async ( req, reply ) => {
+  // Updates the "passcode" config value
+
+  if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
+  if(!req.body || req.body.value === undefined)return reply.send({ ok: false, err: 'VALUE_INVALID' });
+
+  await configData.setPasscode(req.body.value);
+  configData.save();
+
+  reply.send({ ok: true });
 })
 
 fastify.put('/api/v1/settings/autoStart', ( req, reply ) => {

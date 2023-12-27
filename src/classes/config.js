@@ -1,4 +1,5 @@
 const fs = require('fs');
+const argon2 = require('argon2');
 const { Slide } = require('./slide');
 
 class Config {
@@ -62,6 +63,18 @@ class Config {
     s.url = slide.url;
 
     this.save();
+  }
+
+  async setPasscode( plaintext ){
+    let hash = await argon2.hash(plaintext);
+    this.passcode = hash;
+
+    console.log(this)
+  }
+
+  async checkCode( plaintext ){
+    let auth = await argon2.verify(this.passcode, plaintext);
+    return auth;
   }
 }
 

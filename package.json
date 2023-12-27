@@ -17,6 +17,7 @@
   "license": "MIT",
   "dependencies": {
     "adblock-rs": "^0.8.1",
+    "argon2": "^0.31.2",
     "electron-squirrel-startup": "^1.0.0",
     "electron-unhandled": "^4.0.1",
     "electron-util": "^0.17.2",
@@ -25,8 +26,8 @@
     "windows-shortcuts": "^0.1.6"
   },
   "devDependencies": {
-    "electron": "^27.0.0",
-    "electron-builder": "^24.6.3"
+    "electron": "^27.1.3",
+    "electron-builder": "^24.9.1"
   },
   "build": {
     "appId": "xyz.phazed.astro",
