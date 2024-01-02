@@ -192,7 +192,7 @@ app.on('ready', () => {
     currentUrl = 'http://localhost';
 
     // Load the landing page
-    if(isDev = process.env.APP_DEV ? (process.env.APP_DEV.trim() == "true") : false)
+    if(process.env.APP_DEV ? (process.env.APP_DEV.trim() == "true") : false)
       mainWindow.loadURL('http://localhost:5173/');
     else
       mainWindow.loadFile(path.join(__dirname, '../ui/index.html'));
@@ -242,7 +242,7 @@ app.on('ready', () => {
   } else{
     // If not load the landing page
 
-    if(isDev = process.env.APP_DEV ? (process.env.APP_DEV.trim() == "true") : false)
+    if(process.env.APP_DEV ? (process.env.APP_DEV.trim() == "true") : false)
       mainWindow.loadURL('http://localhost:5173/');
     else
       mainWindow.loadFile(path.join(__dirname, '../ui/index.html'));
@@ -259,7 +259,7 @@ let displaySlide = ( win ) => {
     case 0:
       let app = server.getAppSlides().find(x => x.id === currentSlide.appId);
       if(!app){
-        if(isDev = process.env.APP_DEV ? (process.env.APP_DEV.trim() == "true") : false)
+        if(process.env.APP_DEV ? (process.env.APP_DEV.trim() == "true") : false)
           win.loadURL('http://localhost:5173/');
         else
           win.loadFile(path.join(__dirname, '../ui/index.html'));
