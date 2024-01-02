@@ -192,7 +192,7 @@ app.on('ready', () => {
     currentUrl = 'http://localhost';
 
     // Load the landing page
-    if(isDev = process.env.APP_DEV ? (process.env.APP_DEV.trim() == "true") : false)
+    if(process.env.APP_DEV ? (process.env.APP_DEV.trim() == "true") : false)
       mainWindow.loadURL('http://localhost:5173/');
     else
       mainWindow.loadFile(path.join(__dirname, '../ui/index.html'));
@@ -201,6 +201,7 @@ app.on('ready', () => {
   // Hook the next slide evemt and go to the next slide
   server.getEmitter().on('next-slide', ( cb ) => {
     clearTimeout(slideTimeout);
+    mainWindow.webContents.send('unload');
 
     if(config.slides[currentSlideIndex + 1]){
       currentSlideIndex += 1;
@@ -216,6 +217,7 @@ app.on('ready', () => {
   // Hook the prev slide event and go to the previous slide
   server.getEmitter().on('prev-slide', ( cb ) => {
     clearTimeout(slideTimeout);
+    mainWindow.webContents.send('unload');
 
     if(config.slides[currentSlideIndex - 1]){
       currentSlideIndex -= 1;
@@ -242,7 +244,7 @@ app.on('ready', () => {
   } else{
     // If not load the landing page
 
-    if(isDev = process.env.APP_DEV ? (process.env.APP_DEV.trim() == "true") : false)
+    if(process.env.APP_DEV ? (process.env.APP_DEV.trim() == "true") : false)
       mainWindow.loadURL('http://localhost:5173/');
     else
       mainWindow.loadFile(path.join(__dirname, '../ui/index.html'));
@@ -254,27 +256,31 @@ let displaySlide = ( win ) => {
   server.getEmitter().emit('slide-change', currentSlideIndex);
   let currentSlide = config.slides[currentSlideIndex];
 
-  // Check what type of slide it is, if it's a website, load the website
-  switch(currentSlide.type) {
-    case 0:
-      let app = server.getAppSlides().find(x => x.id === currentSlide.appId);
-      if(!app){
-        if(isDev = process.env.APP_DEV ? (process.env.APP_DEV.trim() == "true") : false)
-          win.loadURL('http://localhost:5173/');
-        else
-          win.loadFile(path.join(__dirname, '../ui/index.html'));
-      } else{
-        let loadedSlide = server.getLoadedSlides().find(x => x.id === currentSlide.loadedSlideID);
-        loadedSlide.instance.load();
-      }
+  win.webContents.send('unload');
 
-      break;
-    case 1:
-      currentUrl = currentSlide.url;
-      win.loadURL(currentSlide.url);
-      break;
-  }
+  setTimeout(() => {
+    // Check what type of slide it is, if it's a website, load the website
+    switch(currentSlide.type) {
+      case 0:
+        let app = server.getAppSlides().find(x => x.id === currentSlide.appId);
+        if(!app){
+          if(process.env.APP_DEV ? (process.env.APP_DEV.trim() == "true") : false)
+            win.loadURL('http://localhost:5173/');
+          else
+            win.loadFile(path.join(__dirname, '../ui/index.html'));
+        } else{
+          let loadedSlide = server.getLoadedSlides().find(x => x.id === currentSlide.loadedSlideID);
+          loadedSlide.instance.load();
+        }
 
+        break;
+      case 1:
+        currentUrl = currentSlide.url;
+        win.loadURL(currentSlide.url);
+        break;
+    }
+  }, 500);
+  
   // Wait for the time to run out
   slideTimeout = setTimeout(() => {
     if(!server.getActive())return;
