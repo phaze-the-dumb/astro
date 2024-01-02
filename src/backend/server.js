@@ -51,6 +51,24 @@ fastify.get('/assets/:file', ( req, reply ) => {
   reply.send(fs.readFileSync(path.join(__dirname, '../../ui/panel/assets/'+req.params.file), 'utf8'));
 })
 
+// Relay code, WIP
+fastify.get('/api/v1/relay/slides', ( req, reply ) => {
+  if(req.headers.key !== configData.sharedKey)
+    return reply.send({ ok: false, err: 'INVALID_KEY' });
+
+  reply.send({ ok: true, slides: configData.slides });
+})
+
+fastify.get('/api/v1/relay/apps', ( req, reply ) => {
+  if(req.headers.key !== configData.sharedKey)
+    return reply.send({ ok: false, err: 'INVALID_KEY' });
+
+  let appList = apps.getApps();
+  reply.send({ ok: true, apps: appList.map(x => { return { name: x.name, version: x.version } }) });
+})
+
+// Relay code end
+
 fastify.get('/api/v1/auth/type', ( req, reply ) => {
   if(configData.passcode)
     reply.send({ ok: true, type: 0 });

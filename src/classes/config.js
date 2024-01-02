@@ -1,6 +1,7 @@
 const fs = require('fs');
 const argon2 = require('argon2');
 const { Slide } = require('./slide');
+const crypto = require('crypto');
 
 class Config {
   constructor( path ){
@@ -21,6 +22,10 @@ class Config {
     this.autoStart = json.autoStart;
     this.showAddr = json.showAddr;
     this.passcode = json.passcode;
+    this.sharedKey = json.sharedKey;
+
+    if(!this.sharedKey)
+      this.sharedKey = crypto.randomBytes(32).toString('hex');
   }
 
   save(){
@@ -34,7 +39,8 @@ class Config {
       }),
       autoStart: this.autoStart,
       showAddr: this.showAddr,
-      passcode: this.passcode
+      passcode: this.passcode,
+      sharedKey: this.sharedKey
     }
 
     // Write it to the file
