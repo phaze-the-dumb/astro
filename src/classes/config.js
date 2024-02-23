@@ -1,7 +1,5 @@
 const fs = require('fs');
-const argon2 = require('argon2');
 const { Slide } = require('./slide');
-const crypto = require('crypto');
 
 class Config {
   constructor( path ){
@@ -22,10 +20,6 @@ class Config {
     this.autoStart = json.autoStart;
     this.showAddr = json.showAddr;
     this.passcode = json.passcode;
-    this.sharedKey = json.sharedKey;
-
-    if(!this.sharedKey)
-      this.sharedKey = crypto.randomBytes(32).toString('hex');
   }
 
   save(){
@@ -33,14 +27,13 @@ class Config {
     let json = {
       slides: this.slides.map(s => {
         if(s.type == 0)
-          return { time: s.time, type: s.type, appId: s.appId, appOpts: s.appOpts, slideName: s.slideName };
+          return { time: s.time, type: s.type, appId: s.appId };
         else if(s.type == 1)
           return { time: s.time, type: s.type, url: s.url };
       }),
       autoStart: this.autoStart,
       showAddr: this.showAddr,
-      passcode: this.passcode,
-      sharedKey: this.sharedKey
+      passcode: this.passcode
     }
 
     // Write it to the file
@@ -64,29 +57,11 @@ class Config {
     let s = this.slides.find(x => x.id === id);
 
     s.time = slide.time;
-    s.slideName = slide.slideName;
+    s.appId = slide.appId;
     s.type = slide.type;
     s.url = slide.url;
 
     this.save();
-  }
-
-  setOptions( id, options ){
-    // Update slide options and save it to the file
-    let s = this.slides.find(x => x.id === id);
-    s.appOpts = options;
-
-    this.save();
-  }
-
-  async setPasscode( plaintext ){
-    let hash = await argon2.hash(plaintext);
-    this.passcode = hash;
-  }
-
-  async checkCode( plaintext ){
-    let auth = await argon2.verify(this.passcode, plaintext);
-    return auth;
   }
 }
 

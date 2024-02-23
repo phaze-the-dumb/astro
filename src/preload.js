@@ -4,21 +4,6 @@ const { contextBridge, ipcRenderer } = require('electron');
 const ip = require('ip');
 let alerts = [];
 
-let blackout = document.createElement('div');
-
-blackout.style.background = '#000';
-blackout.style.position = 'fixed';
-blackout.style.top = '0';
-blackout.style.left = '0';
-blackout.style.width = '100%';
-blackout.style.height = '100%';
-blackout.style.zIndex = '100000000000000';
-blackout.style.transition = '0.5s';
-
-window.addEventListener('DOMContentLoaded', () => {
-  document.body.appendChild(blackout);
-})
-
 // Inject our custom styles into the web page
 let styles = document.createElement('style');
 styles.innerHTML = `
@@ -97,10 +82,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
 // Hook load event
 window.addEventListener('load', () => {
-  setTimeout(() => {
-    blackout.style.opacity = '0';
-  }, 10)
-
   ipcRenderer.send('getConfig');
 
   // If we have show address option enabled load the address in the bottom right corner
@@ -136,42 +117,6 @@ ipcRenderer.on('slides-update', ( _event, type, slide ) => {
   new Alert(title, body, 5000);
 });
 
-let selToJson = ( sel ) => {
-  let objs = document.querySelectorAll(sel);
-  let data = [];
-
-  objs.forEach(obj => {
-    if(obj.id === '')
-      obj.id = 'sel-' + Math.random().toString().replace('0.', '');
-
-    data.push({
-      id: obj.id,
-      class: obj.className,
-      innerHTML: obj.innerHTML
-    })
-  })
-
-  return JSON.stringify(data);
-}
-
 ipcRenderer.on('query-selector', ( _event, selector ) => {
-  ipcRenderer.send('query-selector', selToJson(selector),  selector);
-})
-
-ipcRenderer.on('selector-command', ( _event, selector, command, value ) => {
-  switch(command){
-    case 'set-class':
-      document.querySelector(selector).className = value;
-      break;
-    case 'set-innerhtml':
-      document.querySelector(selector).innerHTML = value;
-      break;
-    case 'set-property':
-      document.querySelector(selector).setProperty(value.split(',|,|,')[0], value.split(',|,|,')[1]);
-      break;
-  }
-})
-
-ipcRenderer.on('unload', () => {
-  blackout.style.opacity = '1';
+  ipcRenderer.send('query-selector', document.querySelectorAll(selector));
 })

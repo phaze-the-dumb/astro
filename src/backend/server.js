@@ -15,8 +15,7 @@ let isStarted = false;
 let configData = null;
 let currentSlide = 0;
 let lastTime = Date.now();
-let availableSlides = [];
-let loadedSlides = [];
+let appSlides = [];
 
 // Hook slide change event
 emitter.on('slide-change', ( index ) => {
@@ -24,15 +23,9 @@ emitter.on('slide-change', ( index ) => {
   lastTime = Date.now();
 })
 
-// When a new slide is made available, add it to the array
-emitter.on('availableSlide', ( options, SlideClass, app ) => {
-  availableSlides.push({ 
-    displayName: options.name,
-    opts: options.options,
-    class: SlideClass,
-    app: app,
-    id: options.id
-  });
+// Hook register slide event
+emitter.on('registerSlide', ( slide ) => {
+  appSlides.push(slide);
 })
 
 // When user opens the webpage, send the html file
@@ -51,35 +44,7 @@ fastify.get('/assets/:file', ( req, reply ) => {
   reply.send(fs.readFileSync(path.join(__dirname, '../../ui/panel/assets/'+req.params.file), 'utf8'));
 })
 
-// Relay code, WIP
-fastify.get('/api/v1/relay/slides', ( req, reply ) => {
-  if(req.headers.key !== configData.sharedKey)
-    return reply.send({ ok: false, err: 'INVALID_KEY' });
-
-  reply.send({ ok: true, slides: configData.slides });
-})
-
-fastify.get('/api/v1/relay/apps', ( req, reply ) => {
-  if(req.headers.key !== configData.sharedKey)
-    return reply.send({ ok: false, err: 'INVALID_KEY' });
-
-  let appList = apps.getApps();
-  reply.send({ ok: true, apps: appList.map(x => { return { name: x.name, version: x.version } }) });
-})
-
-// Relay code end
-
-fastify.get('/api/v1/auth/type', ( req, reply ) => {
-  if(configData.passcode)
-    reply.send({ ok: true, type: 0 });
-  else
-    reply.send({ ok: true, type: 1 });
-})
-
 fastify.get('/api/v1/auth/link', ( req, reply ) => {
-  if(configData.passcode)
-    return reply.send({ ok: false, err: 'USE_PASSCODE' });
-
   if(isStarted){
     // If we are already playing slides, stop the slideshow and open the link code
     emitter.emit('stop');
@@ -102,16 +67,11 @@ fastify.get('/api/v1/auth/link', ( req, reply ) => {
   }
 })
 
-fastify.post('/api/v1/auth', async ( req, reply ) => {
-  if(configData.passcode){
-    if(req.body.code == null || typeof req.body.code !== 'string')return reply.send({ ok: false, err: 'CODE_INVALID' });
-    if(!await configData.checkCode(req.body.code))return reply.send({ ok: false, err: 'CODE_INVALID' });
-  } else{
-    if(isStarted)return reply.send({ ok: false, err: 'STARTED' });
+fastify.post('/api/v1/auth', ( req, reply ) => {
+  if(isStarted)return reply.send({ ok: false, err: 'STARTED' });
 
-    if(code == null)return reply.send({ ok: false, err: 'CODE_INVALID' });
-    if(req.body.code !== code)return reply.send({ ok: false, err: 'CODE_INVALID' });
-  }
+  if(code == null)return reply.send({ ok: false, err: 'CODE_INVALID' });
+  if(req.body.code !== code)return reply.send({ ok: false, err: 'CODE_INVALID' });
 
   // Generate a token and send it to the client
   let token = crypto.randomBytes(32).toString('hex');
@@ -132,7 +92,7 @@ fastify.get('/api/v1/apps/slides', ( req, reply ) => {
   // Returns a list of all the available application slides
 
   if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
-  reply.send({ ok: true, slides: availableSlides.map(x => { return { name: x.displayName, id: x.id } }) });
+  reply.send({ ok: true, slides: appSlides.map(x => { return { name: x.name, id: x.id } }) });
 })
 
 fastify.get('/api/v1/apps/slides/:slide', ( req, reply ) => {
@@ -140,10 +100,10 @@ fastify.get('/api/v1/apps/slides/:slide', ( req, reply ) => {
 
   if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
 
-  let slide = availableSlides.find(x => x.id === req.params.slide);
+  let slide = appSlides.find(x => x.id === req.params.slide);
   if(!slide)return reply.send({ ok: false, err: 'SLIDE_INVALID' });
 
-  reply.send({ ok: true, options: slide.opts, id: slide.id, name: slide.displayName });
+  reply.send({ ok: true, options: slide.opts, id: slide.id, name: slide.name });
 })
 
 fastify.get('/api/v1', ( req, reply ) => {
@@ -160,48 +120,19 @@ fastify.put('/api/v1/slides', ( req, reply ) => {
   if(!req.body || !req.body.time || req.body.type == undefined || !req.body.time)return reply.send({ ok: false, err: 'BODY_INVALID' });
 
   if(req.body.type == 0 && !req.body.appId)return reply.send({ ok: false, err: 'APPID_INVALID' });
-  if(req.body.type == 0 && !req.body.name)return reply.send({ ok: false, err: 'NAME_INVALID' });
   else if(req.body.type == 1 && !req.body.url)return reply.send({ ok: false, err: 'URL_INVALID' });
 
-  if(req.body.type === 0){
-    let slideTemp = availableSlides.find(x => x.id === req.body.appId);
-    let slide = slideTemp.app.createSlide(slideTemp.class, req.body.appOpts);
+  let slide = new Slide({
+    type: req.body.type,
+    time: req.body.time,
+    appId: req.body.appId,
+    url: req.body.url
+  });
 
-    let slideID = crypto.randomUUID();
+  emitter.emit('slides-update', 0, slide);
 
-    loadedSlides.push({
-      id: slideID,
-      instance: slide
-    })
-
-    let slideInfo = new Slide({
-      type: req.body.type,
-      time: req.body.time,
-      appId: req.body.appId,
-      appOpts: req.body.appOpts,
-      url: req.body.url,
-      loadedSlideID: slideID,
-      slideName: req.body.name
-    });
-
-    emitter.emit('slides-update', 0, slideInfo);
-
-    configData.addSlide(slideInfo);
-    reply.send({ ok: true, slide: slideInfo });
-  } else{
-    let slide = new Slide({
-      type: req.body.type,
-      time: req.body.time,
-      appId: req.body.appId,
-      appOpts: req.body.appOpts,
-      url: req.body.url
-    });
-
-    emitter.emit('slides-update', 0, slide);
-
-    configData.addSlide(slide);
-    reply.send({ ok: true, slide });
-  }
+  configData.addSlide(slide);
+  reply.send({ ok: true, slide });
 })
 
 fastify.put('/api/v1/slides/:id', ( req, reply ) => {
@@ -210,8 +141,10 @@ fastify.put('/api/v1/slides/:id', ( req, reply ) => {
   if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
   if(!req.params.id)return reply.send({ ok: false, err: 'ID_INVALID' });
 
-  if(!req.body || !req.body.time || req.body.type === undefined)return reply.send({ ok: false, err: 'BODY_INVALID' });
-  if(req.body.type == 1 && !req.body.url)return reply.send({ ok: false, err: 'URL_INVALID' });
+  if(!req.body || !req.body.time || !req.body.type || !req.body.time)return reply.send({ ok: false, err: 'BODY_INVALID' });
+
+  if(req.body.type == 0 && !req.body.appId)return reply.send({ ok: false, err: 'APPID_INVALID' });
+  else if(req.body.type == 1 && !req.body.url)return reply.send({ ok: false, err: 'URL_INVALID' });
 
   emitter.emit('slides-update', 2, configData.slides.find(x => x.id === req.params.id));
 
@@ -264,8 +197,6 @@ fastify.put('/api/v1/apps/option', ( req, reply ) => {
   if(!app)return reply.send({ ok: false, err: 'ID_INVALID' });
 
   app.emit('options', req.body.key, req.body.value);
-  configData.setOptions(req.query.slideId, app.opts);
-
   reply.send({ ok: true });
 })
 
@@ -274,18 +205,6 @@ fastify.get('/api/v1/settings', ( req, reply ) => {
 
   if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
   reply.send({ ok: true, autoStart: configData.autoStart, showAddr: configData.showAddr });
-})
-
-fastify.put('/api/v1/settings/passcode', async ( req, reply ) => {
-  // Updates the "passcode" config value
-
-  if(!tokens.find(x => x == req.headers.token))return reply.send({ ok: false, err: 'TOKEN_INVALID' });
-  if(!req.body || req.body.value === undefined)return reply.send({ ok: false, err: 'VALUE_INVALID' });
-
-  await configData.setPasscode(req.body.value);
-  configData.save();
-
-  reply.send({ ok: true });
 })
 
 fastify.put('/api/v1/settings/autoStart', ( req, reply ) => {
@@ -345,27 +264,6 @@ let config = ( c ) => {
   // Loads external apps (./apploader.js)
   apps.config(configData, emitter);
   apps.loadApps();
-
-  configData.slides.forEach((slide, i) => {
-    if(slide.type !== 0)return;
-    
-    let slideTemp = availableSlides.find(x => x.id === slide.appId);
-    let slideInstance = slideTemp.app.createSlide(slideTemp.class, slide.appOpts);
-
-    let slideID = crypto.randomUUID();
-
-    loadedSlides.push({
-      id: slideID,
-      instance: slideInstance
-    })
-
-    configData.slides[i].loadedSlideID = slideID;
-  })
 };
 
-module.exports = { 
-  getEmitter: () => emitter, config, 
-  getActive: () => isStarted,
-  getAppSlides: () => availableSlides,
-  getLoadedSlides: () => loadedSlides,
-};
+module.exports = { getEmitter: () => emitter, config, getActive: () => isStarted, getAppSlides: () => appSlides };
