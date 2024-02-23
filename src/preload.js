@@ -10,11 +10,12 @@ blackout.style.height = '100%';
 blackout.style.zIndex = '100000000000000';
 blackout.style.transition = '0.5s';
 
-document.body.appendChild(blackout);
-
-window.addEventListener('DOMContentLoaded', () => {
-  document.body.appendChild(blackout);
-})
+let i = setInterval(() => {
+  if(document.body){
+    document.body.appendChild(blackout);
+    window.clearInterval(i);
+  }
+}, 1)
 
 const { contextBridge, ipcRenderer } = require('electron');
 const ip = require('ip');
