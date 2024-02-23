@@ -4,6 +4,21 @@ const { contextBridge, ipcRenderer } = require('electron');
 const ip = require('ip');
 let alerts = [];
 
+let blackout = document.createElement('div');
+
+blackout.style.background = '#000';
+blackout.style.position = 'fixed';
+blackout.style.top = '0';
+blackout.style.left = '0';
+blackout.style.width = '100%';
+blackout.style.height = '100%';
+blackout.style.zIndex = '100000000000000';
+blackout.style.transition = '0.5s';
+
+window.addEventListener('DOMContentLoaded', () => {
+  document.body.appendChild(blackout);
+})
+
 // Inject our custom styles into the web page
 let styles = document.createElement('style');
 styles.innerHTML = `
@@ -82,6 +97,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
 // Hook load event
 window.addEventListener('load', () => {
+  setTimeout(() => {
+    blackout.style.opacity = '0';
+  }, 10)
+
   ipcRenderer.send('getConfig');
 
   // If we have show address option enabled load the address in the bottom right corner
@@ -119,4 +138,8 @@ ipcRenderer.on('slides-update', ( _event, type, slide ) => {
 
 ipcRenderer.on('query-selector', ( _event, selector ) => {
   ipcRenderer.send('query-selector', document.querySelectorAll(selector));
+})
+
+ipcRenderer.on('unload', () => {
+  blackout.style.opacity = '1';
 })
