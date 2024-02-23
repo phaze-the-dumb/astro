@@ -62,7 +62,6 @@ let errorCodes: any = {
   'APPID_INVALID': 'App id is invalid.',
   'URL_INVALID': 'URL is invalid.',
   'BODY_INVALID': 'Body is invalid.',
-  'NAME_INVALID': 'Name is invalid.',
 }
 
 // Init empty values
@@ -77,43 +76,26 @@ let creatorAppSlide: any = null;
 
 // Hook window load event
 window.onload = () => {
-  // Get authentication type
-  fetch('/api/v1/auth/type')
+  // Check if has a valid token
+  if(!localStorage.getItem('token'))return;
+
+  // Check if token is valid
+  fetch('/api/v1', {
+    headers: {
+      token: localStorage.getItem('token')!
+    }
+  })
     .then(data => data.json())
     .then(data => {
-      console.log(data);
-      if(data.type == 0){
-        loader.style.display = 'none';
-        codeInput.style.display = 'block';
+      if(data.ok){
         getCodeButton.style.display = 'none';
-        linkCode.input.setAttribute('type', 'password');
-      } else if(data.type == 1){
-        getCodeButton.style.display = 'block';
-        linkCode.input.setAttribute('type', 'text');
+        main();
       }
-
-      // Check if has a valid token
-      if(!localStorage.getItem('token'))return; 
-      
-      // Check if token is valid
-      fetch('/api/v1', {
-        headers: {
-          token: localStorage.getItem('token')!
-        }
-      })
-        .then(data => data.json())
-        .then(data => {
-          if(data.ok){
-            getCodeButton.style.display = 'none';
-            codeInput.style.display = 'none';
-            main();
-          }
-        })
     })
 }
 
 getCodeButton.onclick = () => {
-  // When get code button is pressed, fetch the backend and show the code input
+  // When get code button is pressed, fetch the backend and show the code
   loader.style.display = 'block';
 
   fetch('/api/v1/auth/link')
@@ -155,12 +137,10 @@ linkCode.clicked = () => {
 
         main()
       } else{
-        loader.style.display = 'none';
         new Alert('Error', errorCodes[data.err], 5000);
       }
     })
     .catch(e => {
-      loader.style.display = 'none';
       new Alert('Error', e, 5000);
     })
 }
@@ -175,7 +155,6 @@ let main = async () => {
   slides = (await slidesReq.json()).slides;
 
   console.log(slides);
-  codeInput.style.display = 'none';
 
   for(let s of slides){
     // Render each slide
@@ -207,8 +186,7 @@ let main = async () => {
       // Add slide to the list
       slidesScrolled.push(slide);
       slideScroller.insertBefore(slide, newSlideButton);
-    } else if (s.type == 0){
-      console.log(s, slides);
+    } else if (s.type == 0 && s.appId){
       let slide = document.createElement('div');
       slide.className = 'slide';
 
@@ -216,10 +194,10 @@ let main = async () => {
       text.className = 'text';
 
       // Make sure text length never exceeds 23 characters
-      if(s.slideName.length > 20)
-        text.innerHTML = s.slideName.slice(0, 20) + '...'
+      if(s.appId.length > 20)
+        text.innerHTML = s.appId.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
       else
-        text.innerHTML = s.slideName.slice(0, 20);
+        text.innerHTML = s.appId.replace('https://', '').replace('http://', '').slice(0, 20);
 
       let edit = document.createElement('div');
       edit.className = 'edit-button';
@@ -250,11 +228,11 @@ let main = async () => {
         playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
       else
         playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '')
-    } else if(currentSlide.type == 0 && currentSlide){
-      if(currentSlide.slideName.length > 20)
-        playerInfo.innerHTML = currentSlide.slideName.slice(0, 20) + '...'
+    } else if(currentSlide.type == 0 && currentSlide.appId){
+      if(currentSlide.appId.length > 20)
+        playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
       else
-        playerInfo.innerHTML = currentSlide.slideName
+        playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '')
     }
 
     playerActive = true;
@@ -295,11 +273,11 @@ let main = async () => {
           playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
         else
           playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '')
-      } else if(currentSlide.type == 0){
-        if(currentSlide.slideName.length > 20)
-          playerInfo.innerHTML = currentSlide.slideName.slice(0, 20) + '...'
+      } else if(currentSlide.type == 0 && currentSlide.appId){
+        if(currentSlide.appId.length > 20)
+          playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
         else
-          playerInfo.innerHTML = currentSlide.slideName
+          playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '')
       }
     }
   }, 1000);
@@ -389,9 +367,9 @@ nextButton.onclick = async () => {
       playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '')
   } else if(currentSlide.type == 0 && currentSlide.appId){
     if(currentSlide.appId.length > 20)
-      playerInfo.innerHTML = currentSlide.slideName.slice(0, 20) + '...'
+      playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
     else
-      playerInfo.innerHTML = currentSlide.slideName
+      playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '')
   }
 
   let infoReq = await fetch('/api/v1', { headers: { token: localStorage.getItem('token')! }});
@@ -429,9 +407,9 @@ prevButton.onclick = async () => {
       playerInfo.innerHTML = currentSlide.url.replace('https://', '').replace('http://', '')
   } else if(currentSlide.type == 0 && currentSlide.appId){
     if(currentSlide.appId.length > 20)
-      playerInfo.innerHTML = currentSlide.slideName.slice(0, 20) + '...'
+      playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
     else
-      playerInfo.innerHTML = currentSlide.slideName
+      playerInfo.innerHTML = currentSlide.appId.replace('https://', '').replace('http://', '')
   }
 
   let infoReq = await fetch('/api/v1', { headers: { token: localStorage.getItem('token')! }});
@@ -487,26 +465,35 @@ let slideEditor = ( slide: Slide ) => {
   if(slide.type == 1 && slide.url)
     slideUrl.input.value = slide.url;
 
-  if(slide.type == 0)
-    slideUrl.input.value = slide.slideName;
-
   slideUrl.clicked = async () => {
     // When the slide is updated
+    if(slide.type == 0){
+      slideEditorContainer.style.opacity = '0';
+      slidesContainer.style.width = '300px';
 
-    let newUrl = undefined;
-    let newName = undefined;
+      currentSlideId = null;
 
-    if(slide.type == 0)
-      newName = slideUrl.input.value;
-    else
-      newUrl = slideUrl.input.value;
+      // Animate back to the slide list
+      setTimeout(() => {
+        slideEditorContainer.style.display = 'none';
 
+        slideScroller.style.display = 'inline-block';
+
+        setTimeout(() => {
+          slideScroller.style.opacity = '1';
+        }, 10)
+      }, 500);
+
+      return;
+    }
+
+    let newUrl = slideUrl.input.value;
     let newTime = parseInt(editorTimeInput.value) * 1000;
 
     console.log(newUrl, newTime);
 
     // Send the data to the backend and update the slide
-    let payload = { time: newTime, url: newUrl, type: slide.type, slideName: newName };
+    let payload = { time: newTime, url: newUrl, type: 1 };
 
     let req = await fetch('/api/v1/slides/' + slide.id, { method: 'PUT', headers: { 'Content-Type': 'application/json', token: localStorage.getItem('token')! }, body: JSON.stringify(payload) });
     let res = await req.json();
@@ -515,77 +502,8 @@ let slideEditor = ( slide: Slide ) => {
       return new Alert('Error', errorCodes[res.err] || res.err, 5000);
 
     // Update the local slide values
+    slide.url = newUrl;
     slide.time = newTime;
-
-    if(slide.type == 0)
-      slide.slideName = newName!;
-    else
-      slide.url = newUrl;
-
-    slideScroller.innerHTML = '';
-    slideScroller.appendChild(newSlideButton);
-
-    for(let s of slides){
-      // Render each slide
-      if(s.type == 1 && s.url){
-        let slide = document.createElement('div');
-        slide.className = 'slide';
-  
-        let text = document.createElement('div');
-        text.className = 'text';
-  
-        // Make sure text length never exceeds 23 characters
-        if(s.url.length > 20)
-          text.innerHTML = s.url.replace('https://', '').replace('http://', '').slice(0, 20) + '...'
-        else
-          text.innerHTML = s.url.replace('https://', '').replace('http://', '').slice(0, 20);
-  
-        let edit = document.createElement('div');
-        edit.className = 'edit-button';
-        edit.innerHTML = '<i class="fa-solid fa-pen"></i>';
-  
-        slide.appendChild(text);
-        slide.appendChild(edit);
-  
-        // When slide is clicked, open the slide settings menu
-        slide.onclick = () => {
-          slideEditor(s);
-        }
-  
-        // Add slide to the list
-        slidesScrolled.push(slide);
-        slideScroller.insertBefore(slide, newSlideButton);
-      } else if (s.type == 0){
-        console.log(s, slides);
-        let slide = document.createElement('div');
-        slide.className = 'slide';
-  
-        let text = document.createElement('div');
-        text.className = 'text';
-  
-        // Make sure text length never exceeds 23 characters
-        if(s.slideName.length > 20)
-          text.innerHTML = s.slideName.slice(0, 20) + '...'
-        else
-          text.innerHTML = s.slideName.slice(0, 20);
-  
-        let edit = document.createElement('div');
-        edit.className = 'edit-button';
-        edit.innerHTML = '<i class="fa-solid fa-pen"></i>';
-  
-        slide.appendChild(text);
-        slide.appendChild(edit);
-  
-        // When slide is clicked, open the slide settings menu
-        slide.onclick = () => {
-          slideEditor(s);
-        }
-  
-        // Add slide to the list
-        slidesScrolled.push(slide);
-        slideScroller.insertBefore(slide, newSlideButton);
-      }
-    }
 
     slideEditorContainer.style.opacity = '0';
     slidesContainer.style.width = '300px';
@@ -659,7 +577,7 @@ slideDeleteButton.onclick = () => {
     }
   })
     .then(data => data.json())
-    .then(async data => {
+    .then(data => {
       if(!data.ok)
         return new Alert('Error', errorCodes[data.err], 5000);
 
@@ -690,26 +608,6 @@ slideDeleteButton.onclick = () => {
           slideScroller.style.opacity = '1';
         }, 10)
       }, 500);
-
-      if(slides.length == 0){
-        // Tell the backend to stop the slideshow
-        let req = await fetch('/api/v1/stop', { headers: { token: localStorage.getItem('token')! }});
-        let res = await req.json();
-
-        if(res.err === 'STOPPED')return;
-
-        if(!res.ok)
-          return new Alert('Error', errorCodes[res.err] || res.err, 5000);
-
-        currentSlide = null;
-
-        // Hide the player
-        playerActive = false;
-        startButton.style.display = 'inline-block';
-        stopButton.style.display = 'none';
-        player.style.display = 'none';
-        slidesContainer.style.display = 'inline-block';
-      }
     })
     .catch(e => {
       new Alert('Error', e, 5000);
@@ -778,69 +676,85 @@ let applicationPicked = async ( id: string ) => {
   creatorAppSlide = options;
   creatorChooseApp.style.display = 'none';
 
-  creatorAppSlide.appOpts = {};
-
   if(Object.keys(options)[0])
     displayAppOpt(0);
-  else 
-    displayAppOpt(-1);
+  else {
+    creatorChooseTime.style.display = 'block';
+
+    creatorTimeInput.value = (30).toString();
+    creatorTime.innerHTML = formatTime(30);
+
+    creatorTimeInput.oninput = () => {
+      creatorTime.innerHTML = formatTime(parseInt(creatorTimeInput.value));
+    }
+  }
 }
 
 let displayAppOpt = ( index: number ) => {
-  if(index === -1){
-    creatorOptionStringMenu.style.display = 'block';
-    creatorOptionStringTitle.innerHTML = 'Slide Name:';
+  // Check the slide exists
+  if(!creatorAppSlide)
+    return new Alert('Invaild', 'Cannot display options of an app that doesn\'t exist.', 5000);
 
-    creatorOptionString.clicked = async () => {
-      creatorOptionStringMenu.style.display = 'none';
+  // Find the option
+  let options = Object.keys(creatorAppSlide.options);
+  let opt = options[index];
 
-      creatorAppSlide.slideName = creatorOptionString.input.value;
-      creatorOptionString.input.value = '';
+  // Check the option exists
+  if(!opt)
+    return new Alert('Invaild', 'Cannot display an option of an app that doesn\'t exist.', 5000);
 
-      creatorChooseTime.style.display = 'block';
+  // Get the option info
+  let info = creatorAppSlide.options[opt];
 
-      creatorTimeInput.value = (30).toString();
-      creatorTime.innerHTML = formatTime(30);
+  // Get the option name
+  let title = opt;
+  title = title[0].toUpperCase() + title.substring(1); // Capitalize the title
 
-      creatorTimeInput.oninput = () => {
-        creatorTime.innerHTML = formatTime(parseInt(creatorTimeInput.value));
-      }
-    }
-  } else{
-    // Check the slide exists
-    if(!creatorAppSlide)
-      return new Alert('Invaild', 'Cannot display options of an app that doesn\'t exist.', 5000);
+  //Check the type
+  console.log(title, info);
+  switch(info.type){
+    case 'String':
+      creatorOptionStringMenu.style.display = 'block';
+      creatorOptionStringTitle.innerHTML = title;
 
-    // Get the option info
-    let info = creatorAppSlide.options[index];
+      creatorOptionString.clicked = async () => {
+        creatorOptionStringMenu.style.display = 'none';
 
-    // Get the option name
-    let title = info.name;
+        console.log(creatorAppSlide);
+        let req = await fetch('/api/v1/apps/option?slideId=' + creatorAppSlide.id, {
+          method: 'PUT',
+          body: JSON.stringify({
+            key: opt,
+            value: creatorOptionString.input.value
+          }),
+          headers: {
+            'content-type': 'application/json',
+            token: localStorage.getItem('token')!
+          }
+        });
+        let res = await req.json();
 
-    //Check the type
-    console.log(title, info);
-    switch(info.type){
-      case 'String':
-        creatorOptionStringMenu.style.display = 'block';
-        creatorOptionStringTitle.innerHTML = title;
+        if(!res.ok)
+          return new Alert("Error", errorCodes[res.err] || res.err, 5000);
 
-        creatorOptionString.clicked = async () => {
-          creatorOptionStringMenu.style.display = 'none';
+        if(options[index + 1])
+          displayAppOpt(index + 1);
+        else {
+          creatorChooseTime.style.display = 'block';
 
-          creatorAppSlide.appOpts[info.key] = creatorOptionString.input.value;
-          creatorOptionString.input.value = '';
+          creatorTimeInput.value = (30).toString();
+          creatorTime.innerHTML = formatTime(30);
 
-          if(creatorAppSlide.options[index + 1])
-            displayAppOpt(index + 1);
-          else 
-            displayAppOpt(-1);
+          creatorTimeInput.oninput = () => {
+            creatorTime.innerHTML = formatTime(parseInt(creatorTimeInput.value));
+          }
         }
+      }
 
-        break;
-      default:
-        new Alert('Invaild Type', info.type + ' is an invaild type', 5000);
-        break;
-    }
+      break;
+    default:
+      new Alert('Invaild Type', info.type + ' is an invaild type', 5000);
+      break;
   }
 }
 
@@ -889,25 +803,16 @@ creatorChooseTimeBackBtn.onclick = () => {
 }
 
 creatorCreate.onclick = async () => {
-  console.log(creatorAppSlide);
   let url = creatorSlideUrl.input.value;
   let time = parseInt(creatorTimeInput.value) * 1000;
   let type = creatorType;
-  let appId = undefined;
-  let name = undefined;
+  let appId = creatorAppSlide.id;
+  console.log(creatorAppSlide);
 
   if(type == undefined)
     return new Alert('Error', 'Cannot create a slide without a type, Please press cancel and try again', 5000);
 
-  let appOpts = undefined;
-
-  if(creatorAppSlide && type === 0){
-    appOpts = creatorAppSlide.appOpts;
-    appId = creatorAppSlide.id;
-    name = creatorAppSlide.slideName
-  }
-
-  let payload = { type, url, time, appId, appOpts, name };
+  let payload = { type, url, time, appId };
 
   let req = await fetch('/api/v1/slides', { method: 'PUT', body: JSON.stringify(payload), headers: { 'Content-Type': 'application/json', token: localStorage.getItem('token')! } });
   let res = await req.json();
@@ -925,10 +830,6 @@ creatorCreate.onclick = async () => {
   s.url = url;
   s.appId = appId;
   s.id = res.slide.id;
-  s.slideName = name;
-
-  if(creatorAppSlide)
-    s.appOpts = creatorAppSlide.appOpts;
 
   if(s.type == 1 && s.url){
     let slide = document.createElement('div');
@@ -963,9 +864,9 @@ creatorCreate.onclick = async () => {
     text.className = 'text';
 
     if(s.appId.length > 20)
-      text.innerHTML = s.slideName.slice(0, 20) + '...';
+      text.innerHTML = s.appId.replace('https://', '').replace('http://', '').slice(0, 20) + '...';
     else
-      text.innerHTML = s.slideName;
+      text.innerHTML = s.appId.replace('https://', '').replace('http://', '');
 
     let edit = document.createElement('div');
     edit.className = 'edit-button';

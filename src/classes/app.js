@@ -3,7 +3,7 @@
 const { EventEmitter } = require('events');
 const fs = require('fs');
 const path = require('path');
-const { AstroElement } = require('../classes/element');
+const { Slide } = require('../classes/appslide');
 
 class Application extends EventEmitter{
   constructor(loaderEmitter){
@@ -11,87 +11,17 @@ class Application extends EventEmitter{
 
     // Create an interface for the applications to hook into
     this.interface = {
-      registerSlide: ( SlideClass, options ) => {
-        if(!options.name)
-          throw new Error("Cannot create a new slide without a valid name.");
+      registerSlide: ( name ) => {
+        // When the application wants to create a new slide template, create a new appslide class (../classes/appslide.js)
+        let slide = new Slide(name, loaderEmitter, this);
 
-        if(!options.options)options.options = [];
-
-        // Tell the webserver that there is another available slide
-        loaderEmitter.emit('availableSlide', options, SlideClass, this);
-      }
-    }
-
-    this.slideInterface = {
-      loadHTML: (file) => {
-        return new Promise((res, rej) => {
-          loaderEmitter.once('slide-loaded', ( ok ) => {
-            if(ok)
-              res(this.pageInterface);
-            else
-              rej();
-          })
-    
-          loaderEmitter.emit('load-html', file);
-        })
-      },
-  
-      loadURL: (url) => {
-        return new Promise((res, rej) => {
-          loaderEmitter.once('slide-loaded', ( ok ) => {
-            if(ok)
-              res(this.pageInterface);
-            else
-              rej();
-          })
-    
-          loaderEmitter.emit('load-url', url);
-        })
+        return slide;
       }
     }
 
     this.pageInterface = {
       querySelector: ( selector ) => {
-        return new Promise(( res ) => {
-          loaderEmitter.emit('query-selector', selector);
-
-          let timeout = setTimeout(() => {
-            console.warn('No query selector response in 5 seconds, has the frontend crashed?');
-            loaderEmitter.removeListener('query-selector', cb);
-          }, 5000);
-  
-          let cb = ( element, query ) => {
-            if(query === selector){
-              loaderEmitter.removeListener('query-selector', cb);
-              clearTimeout(timeout);
-  
-              let elData = JSON.parse(element)[0];
-              let el = new AstroElement();
-              
-              el.class = elData.class;
-              el.id = elData.id;
-              el.innerHTML = elData.innerHTML;
-  
-              el.setClass = ( cls ) => {
-                el.class = cls;
-                loaderEmitter.emit('selector-command', '#' + el.id, 'set-class', cls);
-              }
-  
-              el.setInnerHTML = ( html ) => {
-                el.innerHTML = html;
-                loaderEmitter.emit('selector-command', '#' + el.id, 'set-innerhtml', html);
-              }
-
-              el.setProperty = ( key, value ) => {
-                loaderEmitter.emit('selector-command', '#' + el.id, 'set-property', key + ',|,|,' + value);
-              }
-
-              res(el);
-            }
-          }
-  
-          loaderEmitter.on('query-selector', cb);
-        })
+        
       }
     }
   }
@@ -126,12 +56,8 @@ class Application extends EventEmitter{
       return this.emit('err', '"'+this.main+'" Not found');
 
     // Run the application code
-    this.emit('load');
     this.app = new (require(path.join(p, this.main)))(this.interface);
-  }
-
-  createSlide(SlideClass, options){
-    return new SlideClass(this.slideInterface, options);
+    this.emit('load');
   }
 }
 

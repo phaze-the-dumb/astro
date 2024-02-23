@@ -6,10 +6,7 @@ class Slide{
 
     this.type = json.type; // 0 - App, 1 - Url
     this.time = json.time;
-    this.id = crypto.randomUUID();
-    this.appOpts = json.appOpts;
-    this.loadedSlideID = json.loadedSlideID; // Changes on each load, doesn't get saved into config
-    this.slideName = json.slideName;
+    this.id = crypto.randomUUID()
 
     switch(this.type){
       case 1:
