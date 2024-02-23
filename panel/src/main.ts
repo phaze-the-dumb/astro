@@ -806,8 +806,7 @@ creatorCreate.onclick = async () => {
   let url = creatorSlideUrl.input.value;
   let time = parseInt(creatorTimeInput.value) * 1000;
   let type = creatorType;
-  let appId = creatorAppSlide.id;
-  console.log(creatorAppSlide);
+  let appId = creatorAppSlide ? creatorAppSlide.id : null;
 
   if(type == undefined)
     return new Alert('Error', 'Cannot create a slide without a type, Please press cancel and try again', 5000);
