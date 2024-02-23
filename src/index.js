@@ -10,6 +10,7 @@ const adblockRust = require('adblock-rs');
 // Debugging
 const unhandled = require('electron-unhandled');
 const { openNewGitHubIssue, debugInfo } = require('electron-util');
+const { spawn } = require('child_process');
 
 unhandled({
 	reportButton: error => {
@@ -20,6 +21,8 @@ unhandled({
 		});
 	}
 });
+
+let startTimestamp = Date.now();
 
 // Usually this would be a very bad idea, but this app is needed to be able to open websites with self signed certs.
 app.commandLine.appendSwitch('ignore-certificate-errors');
@@ -266,3 +269,8 @@ let displaySlide = ( win ) => {
     }
   }, currentSlide.time);
 }
+
+setInterval(() => {
+  if(Date.now() - startTimestamp > 86400000)
+    spawn('shutdown /r');
+}, 60000);
