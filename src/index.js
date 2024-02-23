@@ -271,6 +271,6 @@ let displaySlide = ( win ) => {
 }
 
 setInterval(() => {
-  if(Date.now() - startTimestamp > 86400000)
+  if(Date.now() - startTimestamp > 86400000 && (new Date()).getHours() === 0)
     spawn('shutdown /r');
 }, 60000);
