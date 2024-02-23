@@ -1,9 +1,4 @@
 // This script is run on all pages the app loads
-
-const { contextBridge, ipcRenderer } = require('electron');
-const ip = require('ip');
-let alerts = [];
-
 let blackout = document.createElement('div');
 
 blackout.style.background = '#000';
@@ -15,9 +10,15 @@ blackout.style.height = '100%';
 blackout.style.zIndex = '100000000000000';
 blackout.style.transition = '0.5s';
 
+document.body.appendChild(blackout);
+
 window.addEventListener('DOMContentLoaded', () => {
   document.body.appendChild(blackout);
 })
+
+const { contextBridge, ipcRenderer } = require('electron');
+const ip = require('ip');
+let alerts = [];
 
 // Inject our custom styles into the web page
 let styles = document.createElement('style');
