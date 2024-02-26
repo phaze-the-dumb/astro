@@ -22,8 +22,6 @@ unhandled({
 	}
 });
 
-let startTimestamp = Date.now();
-
 // Usually this would be a very bad idea, but this app is needed to be able to open websites with self signed certs.
 app.commandLine.appendSwitch('ignore-certificate-errors');
 
@@ -287,8 +285,3 @@ let displaySlide = ( win ) => {
     }
   }, currentSlide.time);
 }
-
-setInterval(() => {
-  if(Date.now() - startTimestamp > 86400000 && (new Date()).getHours() === 0)
-    spawn('shutdown /r');
-}, 60000);
